@@ -59,7 +59,83 @@ void
 Population_randomize(struct Population *pop){
     assert(pop != NULL);
     
-    //TODO: implement
+    /* Lifted from NumPy and translated from cython to C
+    
+    cdef npy_intp   k
+    cdef npy_intp   totsize
+    cdef ndarray    alpha_arr, val_arr
+    cdef double     *alpha_data, *val_data
+    cdef npy_intp   i, j
+    cdef double     acc, invacc
+
+    k           = len(alpha)
+    alpha_arr   = <ndarray>PyArray_ContiguousFromObject(alpha, NPY_DOUBLE, 1, 1)
+    alpha_data  = <double*>PyArray_DATA(alpha_arr)
+
+    if size is None:
+        shape = (k,)
+    elif type(size) is int:
+        shape = (size, k)
+    else:
+        shape = size + (k,)
+
+    diric   = np.zeros(shape, np.float64)
+    val_arr = <ndarray>diric
+    val_data= <double*>PyArray_DATA(val_arr)
+
+    i = 0
+    totsize = PyArray_SIZE(val_arr)
+    while i < totsize:
+        acc = 0.0
+        for j from 0 <= j < k:
+            val_data[i+j]   = rk_standard_gamma(self.internal_state, alpha_data[j])
+            acc             = acc + val_data[i+j]
+        invacc  = 1/acc
+        for j from 0 <= j < k:
+            val_data[i+j]   = val_data[i+j] * invacc
+        i = i + k
+
+    return diric
+    */
+
+    //TODO: implement    
+    int k;
+    int totsize;
+    double *alpha_arr, *val_arr;
+    double *alpha_data, *val_data;
+    int i, j;
+    double acc, invacc;
+
+    /*
+    k           = len(alpha)
+    alpha_arr   = <ndarray>PyArray_ContiguousFromObject(alpha, NPY_DOUBLE, 1, 1)
+    alpha_data  = <double*>PyArray_DATA(alpha_arr)
+
+    if size is None:
+        shape = (k,)
+    elif type(size) is int:
+        shape = (size, k)
+    else:
+        shape = size + (k,)
+
+    diric   = np.zeros(shape, np.float64)
+    val_arr = <ndarray>diric
+    val_data= <double*>PyArray_DATA(val_arr)
+
+    i = 0
+    totsize = PyArray_SIZE(val_arr)
+    while i < totsize:
+        acc = 0.0
+        for j from 0 <= j < k:
+            val_data[i+j]   = rk_standard_gamma(self.internal_state, alpha_data[j])
+            acc             = acc + val_data[i+j]
+        invacc  = 1/acc
+        for j from 0 <= j < k:
+            val_data[i+j]   = val_data[i+j] * invacc
+        i = i + k
+
+    return diric
+    */    
 }
 
 struct PopCollection *
