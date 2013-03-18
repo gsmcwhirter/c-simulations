@@ -6,11 +6,6 @@
   "keywords": [],
   "license": "MIT",
   "src": [
-    "src/commander.c",
-    "src/commander.h",
-    "src/term.c",
-    "src/term.h",
-    "src/timestamp.h",
     "src/simulation.c",
     "src/simulation.h"
   ]
