@@ -2,7 +2,7 @@
 #include "minunit.h"
 
 typedef int (*lib_function)(const char *data);
-char *lib_file = "build/lib_replicator_simulations.so";
+char *lib_file = "build/lib_replicator_simulations.a";
 void *lib = NULL;
 
 int 

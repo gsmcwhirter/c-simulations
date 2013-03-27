@@ -1,5 +1,5 @@
 CFLAGS=-g -O2 -Wall -Wextra -Isrc -rdynamic -DNDEBUG $(OPTFLAGS)
-LFLAGS=-ldl $(OPTLIBS)
+LFLAGS=-ldl -lm $(OPTLIBS)
 PREFIX?=/usr/local
 
 SOURCES=$(wildcard src/**/*.c src/*.c)
@@ -8,7 +8,7 @@ OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,$(TEST_SRC))
 
-TARGET=build/lib_replicator_simulations.a
+TARGET=build/libreplicator_simulations.a
 SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
 
 # The Target Build
@@ -23,7 +23,7 @@ $(TARGET): build $(OBJECTS)
 	ranlib $@
 
 $(SO_TARGET): $(TARGET) $(OBJECTS)
-	$(CC) -shared $(OBJECTS) -o $@
+	$(CC) -shared $(OBJECTS) -lm -o $@
 
 build:
 	@mkdir -p build

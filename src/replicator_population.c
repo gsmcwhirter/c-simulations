@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include "replicator_population.h"
+#include "randomkit.h"
+#include "distributions.h"
 
-struct Population *
+population_t *
 Population_create(int size)
 {
-    struct Population *pop = malloc(sizeof(struct Population));
+    population_t *pop = malloc(sizeof(population_t));
     assert(pop != NULL);
     
     pop->size = size;
@@ -17,7 +19,7 @@ Population_create(int size)
 }
 
 void 
-Population_destroy(struct Population *pop)
+Population_destroy(population_t *pop)
 {
     if (pop != NULL){
         free(pop->proportions);
@@ -26,7 +28,7 @@ Population_destroy(struct Population *pop)
 }
 
 int
-Population_equal(struct Population *pop1, struct Population *pop2, double effective_zero)
+Population_equal(population_t *pop1, population_t *pop2, double effective_zero)
 {
     assert(pop1 != NULL);
     assert(pop2 != NULL);
@@ -43,7 +45,7 @@ Population_equal(struct Population *pop1, struct Population *pop2, double effect
 }
 
 void
-Population_copy(struct Population *target, struct Population *source)
+Population_copy(population_t *target, population_t *source)
 {
     assert(source != NULL);
     assert(target != NULL);
@@ -56,7 +58,7 @@ Population_copy(struct Population *target, struct Population *source)
 }
 
 void
-Population_randomize(struct Population *pop){
+Population_randomize(population_t *pop){
     assert(pop != NULL);
     
     /* Lifted from NumPy and translated from cython to C
@@ -98,50 +100,37 @@ Population_randomize(struct Population *pop){
     return diric
     */
 
-    //TODO: implement    
-    int k;
-    int totsize;
-    double *alpha_arr, *val_arr;
-    double *alpha_data, *val_data;
-    int i, j;
+    int i;    
+    int k = pop->size;
     double acc, invacc;
-
-    /*
-    k           = len(alpha)
-    alpha_arr   = <ndarray>PyArray_ContiguousFromObject(alpha, NPY_DOUBLE, 1, 1)
-    alpha_data  = <double*>PyArray_DATA(alpha_arr)
-
-    if size is None:
-        shape = (k,)
-    elif type(size) is int:
-        shape = (size, k)
-    else:
-        shape = size + (k,)
-
-    diric   = np.zeros(shape, np.float64)
-    val_arr = <ndarray>diric
-    val_data= <double*>PyArray_DATA(val_arr)
-
-    i = 0
-    totsize = PyArray_SIZE(val_arr)
-    while i < totsize:
-        acc = 0.0
-        for j from 0 <= j < k:
-            val_data[i+j]   = rk_standard_gamma(self.internal_state, alpha_data[j])
-            acc             = acc + val_data[i+j]
-        invacc  = 1/acc
-        for j from 0 <= j < k:
-            val_data[i+j]   = val_data[i+j] * invacc
-        i = i + k
-
-    return diric
-    */    
+    
+    rk_state rand_state;
+    rk_randomseed(&rand_state);
+    
+    double *diric = malloc(k * sizeof(double));
+    
+    for (i = 0; i < k; i++){
+        *(diric + i) = 0;
+    }
+    
+    i = 0;
+    acc = 0.0;
+    for (i = 0; i < k; i++){
+        *(diric + i) = rk_standard_gamma(&rand_state, 1.0); //the 1 is alpha=1. This generates an exponential eventually.
+        acc = acc + *(diric + i);
+    }
+    invacc = 1/acc;
+    for (i = 0; i < k; i++){
+        *(pop->proportions + i) = *(diric + i) * invacc;
+    }
+    
+    free(diric);
 }
 
-struct PopCollection *
+popcollection_t *
 PopCollection_create(int num_pops, int *sizes)
 {
-    struct PopCollection *coll = malloc(sizeof(struct PopCollection));
+    popcollection_t *coll = malloc(sizeof(popcollection_t));
     assert(coll != NULL);
     
     coll->size = num_pops;
@@ -153,7 +142,7 @@ PopCollection_create(int num_pops, int *sizes)
         *(coll->pop_sizes + i) = *(sizes + i);
     }
     
-    coll->populations = malloc(coll->size * sizeof(struct Population *));
+    coll->populations = malloc(coll->size * sizeof(population_t *));
     assert(coll->populations != NULL);
     
     for (i = 0; i < coll->size; i++){
@@ -163,17 +152,17 @@ PopCollection_create(int num_pops, int *sizes)
     return coll;
 }
 
-struct PopCollection *
-PopCollection_clone(struct PopCollection *original)
+popcollection_t *
+PopCollection_clone(popcollection_t *original)
 {
     assert(original != NULL);
-    struct PopCollection *clon = PopCollection_create(original->size, original->pop_sizes);
+    popcollection_t *clon = PopCollection_create(original->size, original->pop_sizes);
     
     return clon;
 }
 
 void
-PopCollection_destroy(struct PopCollection *coll){
+PopCollection_destroy(popcollection_t *coll){
     if (coll != NULL){
         int i;
         for (i = 0; i < coll->size; i++){
@@ -186,7 +175,7 @@ PopCollection_destroy(struct PopCollection *coll){
 }
 
 int 
-PopCollection_equal(struct PopCollection *coll1, struct PopCollection *coll2, double effective_zero)
+PopCollection_equal(popcollection_t *coll1, popcollection_t *coll2, double effective_zero)
 {
     assert(coll1 != NULL);
     assert(coll2 != NULL);
@@ -203,7 +192,7 @@ PopCollection_equal(struct PopCollection *coll1, struct PopCollection *coll2, do
 }
 
 void
-PopCollection_copy(struct PopCollection *target, struct PopCollection *source)
+PopCollection_copy(popcollection_t *target, popcollection_t *source)
 {
     assert(source != NULL);
     assert(target != NULL);
@@ -216,7 +205,7 @@ PopCollection_copy(struct PopCollection *target, struct PopCollection *source)
 }
 
 void
-PopCollection_randomize(struct PopCollection *coll)
+PopCollection_randomize(popcollection_t *coll)
 {
     assert(coll != NULL);
     

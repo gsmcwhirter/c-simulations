@@ -1,39 +1,17 @@
 #include "minunit.h"
 #include <dlfcn.h>
 
-typedef int (*lib_function)(const char *data);
-char *lib_file = "build/lib_replicator_simulations.so";
-void *lib = NULL;
-
-int 
-check_function(const char *func_to_run, const char *data, int expected)
-{
-    lib_function func = dlsym(lib, func_to_run);
-    check(func != NULL, "Did not find %s function in the library %s: %s", func_to_run, lib_file, dlerror());
-
-    int rc = func(data);
-    check(rc == expected, "Function %s return %d for data: %s", func_to_run, rc, data);
-
-    return 1;
-error:
-    return 0;
-}
-
 char *
-test_dlopen()
+test_library()
 {
-    lib = dlopen(lib_file, RTLD_NOW);
-    mu_assert(lib != NULL, "Failed to open the library to test.");
-
-    return NULL;
-}
-
-char *
-test_dlclose()
-{
-    int rc = dlclose(lib);
+    void *handle = dlopen("./build/libreplicator_simulations.so", RTLD_NOW);
+    char *dlerr = dlerror();
+    mu_assert(dlerr == NULL, "Error opening the library to test.");
+    mu_assert(handle != NULL, "Failed to open the library to test.");
+    
+    int rc = dlclose(handle);
     mu_assert(rc == 0, "Failed to close lib.");
-
+    
     return NULL;
 }
 
@@ -42,8 +20,7 @@ all_tests()
 {
     mu_suite_start();
 
-    mu_run_test(test_dlopen);
-    mu_run_test(test_dlclose);
+    mu_run_test(test_library);
 
     return NULL;
 }

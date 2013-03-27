@@ -6,23 +6,27 @@ struct Population {
     double *proportions;
 };
 
-struct Population * Population_create(int size);
-void Population_destroy(struct Population *pop);
-int Population_equal(struct Population *pop1, struct Population *pop2, double effective_zero);
-void Population_copy(struct Population *target, struct Population *source);
-void Population_randomize(struct Population *pop);
+typedef struct Population population_t;
+
+population_t * Population_create(int size);
+void Population_destroy(population_t *pop);
+int Population_equal(population_t *pop1, population_t *pop2, double effective_zero);
+void Population_copy(population_t *target, population_t *source);
+void Population_randomize(population_t *pop);
 
 struct PopCollection {
     int size;
     int *pop_sizes;
-    struct Population **populations;
+    population_t **populations;
 };
 
-struct PopCollection * PopCollection_create(int num_pops, int *sizes);
-struct PopCollection * PopCollection_clone(struct PopCollection *original);
-void PopCollection_destroy(struct PopCollection *coll);
-int PopCollection_equal(struct PopCollection *coll1, struct PopCollection *coll2, double effective_zero);
-void PopCollection_copy(struct PopCollection *target, struct PopCollection *source);
-void PopCollection_randomize(struct PopCollection *coll);
+typedef struct PopCollection popcollection_t;
+
+popcollection_t * PopCollection_create(int num_pops, int *sizes);
+popcollection_t * PopCollection_clone(popcollection_t *original);
+void PopCollection_destroy(popcollection_t *coll);
+int PopCollection_equal(popcollection_t *coll1, popcollection_t *coll2, double effective_zero);
+void PopCollection_copy(popcollection_t *target, popcollection_t *source);
+void PopCollection_randomize(popcollection_t *coll);
 
 #endif

@@ -1,5 +1,6 @@
 echo "Running unit tests:"
 
+echo `pwd`
 for i in tests/*_tests
 do
     if test -f $i
