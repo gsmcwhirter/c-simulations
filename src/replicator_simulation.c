@@ -5,8 +5,8 @@
 #include "replicator_population.h"
 #include "replicator_game.h"
 
-struct PopCollection *
-replicator_dynamics(struct Game *game, struct PopCollection *start_pops, double alpha, double effective_zero, int max_generations, cb_func on_generation)
+popcollection_t *
+replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, double effective_zero, int max_generations, cb_func on_generation)
 {
     int free_start = 0;
     assert(game != NULL);
@@ -19,10 +19,10 @@ replicator_dynamics(struct Game *game, struct PopCollection *start_pops, double 
     
     int generation = 0;
     
-    struct PopCollection * curr_pops = PopCollection_clone(start_pops);
-    struct PopCollection * next_pops = PopCollection_clone(start_pops);
-    struct PopCollection * end_pops = PopCollection_clone(start_pops);
-    struct StrategyProfiles *profiles = Game_StrategyProfiles_create(game);
+    popcollection_t * curr_pops = PopCollection_clone(start_pops);
+    popcollection_t * next_pops = PopCollection_clone(start_pops);
+    popcollection_t * end_pops = PopCollection_clone(start_pops);
+    strategyprofiles_t *profiles = Game_StrategyProfiles_create(game);
     
     double **payoff_cache = malloc(profiles->count * sizeof(double*));
     assert(payoff_cache != NULL);
@@ -75,7 +75,7 @@ replicator_dynamics(struct Game *game, struct PopCollection *start_pops, double 
 }
 
 double
-earned_payoff(int player, int strategy, struct PopCollection *pops, struct StrategyProfiles *profiles, double **payoff_cache)
+earned_payoff(int player, int strategy, popcollection_t *pops, strategyprofiles_t *profiles, double **payoff_cache)
 {
     assert(pops != NULL);
     assert(profiles != NULL);
@@ -112,7 +112,7 @@ earned_payoff(int player, int strategy, struct PopCollection *pops, struct Strat
 }
 
 double
-average_earned_payoff(int player, struct PopCollection *pops, struct StrategyProfiles *profiles, double **payoff_cache)
+average_earned_payoff(int player, popcollection_t *pops, strategyprofiles_t *profiles, double **payoff_cache)
 {
     assert(pops != NULL);
     assert(profiles != NULL);
@@ -133,7 +133,7 @@ average_earned_payoff(int player, struct PopCollection *pops, struct StrategyPro
 }
 
 void 
-update_population_proportions(double alpha, int player, struct Population *pop, struct PopCollection *curr_pops, struct StrategyProfiles *profiles, double **payoff_cache)
+update_population_proportions(double alpha, int player, population_t *pop, popcollection_t *curr_pops, strategyprofiles_t *profiles, double **payoff_cache)
 {
     assert(pop != NULL);
     assert(curr_pops != NULL);

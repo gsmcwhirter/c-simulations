@@ -3,11 +3,11 @@
 #include "replicator_population.h"
 #include "replicator_game.h"
     
-struct StrategyProfiles *
+strategyprofiles_t *
 StrategyProfiles_create(int players, int *types){
     assert(types != NULL);
     
-    struct StrategyProfiles *sprofs = malloc(sizeof(struct StrategyProfiles));
+    strategyprofiles_t *sprofs = malloc(sizeof(strategyprofiles_t));
     assert(sprofs != NULL);
     
     sprofs->count = 1;
@@ -65,7 +65,7 @@ StrategyProfiles_create(int players, int *types){
 }
 
 void
-StrategyProfiles_destroy(struct StrategyProfiles *sprofs){
+StrategyProfiles_destroy(strategyprofiles_t *sprofs){
     if (sprofs != NULL){
         int i, j;
         for (i = 0; i < sprofs->count; i++){
@@ -86,13 +86,13 @@ StrategyProfiles_destroy(struct StrategyProfiles *sprofs){
     }
 }
 
-struct Game *
+game_t *
 Game_create(int players, int populations, int *types, payoff_function payoffs)
 {
     assert(players > 0);
     assert(populations > 0);
 
-    struct Game *game = malloc(sizeof(struct Game));
+    game_t *game = malloc(sizeof(game_t));
     assert(game != NULL);
     
     assert(populations == 1 || players == populations);
@@ -118,7 +118,7 @@ Game_create(int players, int populations, int *types, payoff_function payoffs)
 }
 
 void
-Game_destroy(struct Game *game)
+Game_destroy(game_t *game)
 {
     if (game != NULL){
         free(game->types);
@@ -127,21 +127,21 @@ Game_destroy(struct Game *game)
     }
 }
 
-struct StrategyProfiles *
-Game_StrategyProfiles_create(struct Game *game)
+strategyprofiles_t *
+Game_StrategyProfiles_create(game_t *game)
 {
     assert(game != NULL);
     
-    struct StrategyProfiles *sprofs = StrategyProfiles_create(game->players, game->types);
+    strategyprofiles_t *sprofs = StrategyProfiles_create(game->players, game->types);
     
     return sprofs;
 }
 
-struct PopCollection *
-Game_PopCollection_create(struct Game *game)
+popcollection_t *
+Game_PopCollection_create(game_t *game)
 {
     assert(game != NULL);
-    struct PopCollection *pop = PopCollection_create(game->populations, game->types);
+    popcollection_t *pop = PopCollection_create(game->populations, game->types);
     assert(pop != NULL);
     
     return pop;

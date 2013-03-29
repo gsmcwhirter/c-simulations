@@ -13,8 +13,10 @@ struct StrategyProfiles {
     int ***player_strategy_profiles;
 };
 
-struct StrategyProfiles * StrategyProfiles_create(int players, int *types);
-void StrategyProfiles_destroy(struct StrategyProfiles *sprofs);
+typedef struct StrategyProfiles strategyprofiles_t;
+
+strategyprofiles_t * StrategyProfiles_create(int players, int *types);
+void StrategyProfiles_destroy(strategyprofiles_t *sprofs);
 
 struct Game {
     int populations;
@@ -23,10 +25,12 @@ struct Game {
     payoff_function payoffs;
 };
 
-struct Game * Game_create(int players, int populations, int *types, payoff_function payoffs);
-void Game_destroy(struct Game *game);
-struct StrategyProfiles * Game_StrategyProfiles_create(struct Game *game);
+typedef struct Game game_t;
 
-struct PopCollection * Game_PopCollection_create(struct Game *game);
+game_t * Game_create(int players, int populations, int *types, payoff_function payoffs);
+void Game_destroy(game_t *game);
+strategyprofiles_t * Game_StrategyProfiles_create(game_t *game);
+
+struct PopCollection * Game_PopCollection_create(game_t *game);
 
 #endif
