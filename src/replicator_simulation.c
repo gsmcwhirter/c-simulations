@@ -69,6 +69,7 @@ replicator_dynamics(struct Game *game, struct PopCollection *start_pops, double 
     }
     
     free(payoff_cache);
+    payoff_cache = NULL;
     
     return end_pops;
 }

@@ -23,7 +23,8 @@ Population_destroy(population_t *pop)
 {
     if (pop != NULL){
         free(pop->proportions);
-        free(pop);    
+        free(pop);
+        pop = NULL;
     }
 }
 
@@ -36,7 +37,7 @@ Population_equal(population_t *pop1, population_t *pop2, double effective_zero)
     
     int i;
     for (i = 0; i < pop1->size; i++){
-        if (fabs(*(pop1->proportions + i) - *(pop2->proportions + i)) < effective_zero){
+        if (fabs(*(pop1->proportions + i) - *(pop2->proportions + i)) > effective_zero){
             return 0;
         }
     }
@@ -171,6 +172,7 @@ PopCollection_destroy(popcollection_t *coll){
         free(coll->pop_sizes);
         free(coll->populations);
         free(coll);
+        coll = NULL;
     }
 }
 

@@ -82,6 +82,7 @@ StrategyProfiles_destroy(struct StrategyProfiles *sprofs){
         free(sprofs->player_strategy_profiles);
         
         free(sprofs);
+        sprofs = NULL;
     }
 }
 
@@ -122,6 +123,7 @@ Game_destroy(struct Game *game)
     if (game != NULL){
         free(game->types);
         free(game);
+        game = NULL;
     }
 }
 
