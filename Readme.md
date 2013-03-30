@@ -1,5 +1,7 @@
 # c-simulations
 
+[![Build Status](https://travis-ci.org/gsmcwhirter/c-simulations.png?branch=develop)](https://travis-ci.org/gsmcwhirter/c-simulations)
+
 This is a library providing a framework for running discrete time
 replicator dynamics simulations in C.
 
