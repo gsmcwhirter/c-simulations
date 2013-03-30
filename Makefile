@@ -4,6 +4,7 @@ PREFIX?=/usr/local
 
 SOURCES=$(wildcard src/**/*.c src/*.c)
 OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
+HEADERS=$(patsubst %.c,%.h,$(SOURCES))
 
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,$(TEST_SRC))
@@ -12,7 +13,7 @@ TARGET=build/libreplicator_simulations.a
 SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
 
 # The Target Build
-all: $(TARGET) $(SO_TARGET) tests
+all: $(TARGET) $(SO_TARGET)
 
 dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS)
 dev: all
@@ -33,14 +34,10 @@ $(TESTS):
 
 # The Unit Tests
 .PHONY: tests
-#tests: CFLAGS += $(TARGET)
-tests: LFLAGS += -Lbuild -lreplicator_simulations
-tests: $(TESTS)
+test: LFLAGS += -Lbuild -lreplicator_simulations
+test: $(TESTS)
 	sh ./tests/runtests.sh
-
-valgrind:
-	VALGRIND="valgrind --log-file=/tmp/valgrind-%p.log" $(MAKE)
-
+	
 # The Cleaner
 clean:
 	rm -rf build $(OBJECTS) $(TESTS)
@@ -50,11 +47,14 @@ clean:
 
 # The Install
 install: all
-	install -d $(DESTDIR)/$(PREFIX)/lib/
-	install $(TARGET) $(DESTDIR)/$(PREFIX)/lib/
+	install -d $(PREFIX)/lib/
+	install -d $(PREFIX)/include/replicator_dynamics/
+	install $(TARGET) $(PREFIX)/lib/
+	install $(SO_TARGET) $(PREFIX)/lib/
+	install $(HEADERS) $(PREFIX)/include/replicator_dynamics/
 
 # The Checker
 BADFUNCS='[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)'
 check:
-	@echo Files with potentially dangerous functions.
+	@echo Files with potentially dangerous functions?
 	@egrep $(BADFUNCS) $(SOURCES) || true
