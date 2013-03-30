@@ -8,7 +8,7 @@
 
 #define mu_suite_start() char *message = NULL
 
-#define mu_assert(test, message) do { if (!(test)) { log_err(message); return message; } } while (0)
+#define mu_assert(test, message) do { assertions_checked++; if (!(test)) { log_err(message); return message; } } while (0)
 #define mu_run_test(test) do {debug("\n-----%s", " " #test); \
     message = test(); tests_run++; if (message) return message; } while (0)
 
@@ -24,9 +24,11 @@
             printf("ALL TESTS PASSED\n");\
         }\
     printf("Tests run: %d\n", tests_run);\
+    printf("Assertions checked: %d\n", assertions_checked);\
         exit(result != 0);\
 }
 
 int tests_run;
+int assertions_checked;
 
 #endif
