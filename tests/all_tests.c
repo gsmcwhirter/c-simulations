@@ -1,8 +1,10 @@
 #include "minunit.h"
 #include <dlfcn.h>
 #include <math.h>
+#include <assert.h>
 #include "replicator_population.h"
 #include "replicator_game.h"
+#include "replicator_simulation.h"
 
 double effective_zero = 0.00000001;
 
@@ -385,7 +387,7 @@ dummy_payoffs(int players, int *profile)
     double * payoffs = malloc(players * sizeof(double));
     int i;
     for (i = 0; i < players; i++){
-        *(payoffs + i) = 0;
+        *(payoffs + i) = 2 * *(profile + i);
     }
     
     return payoffs;
@@ -419,7 +421,7 @@ test_game_create_destroy()
     
     poffs1 = game1->payoffs(1, profile1);
     for (i = 0; i < game1->players; i++){
-        mu_assert(*(poffs1 + i) == 0, "G1 payoffs were wrong.");
+        mu_assert(*(poffs1 + i) == 2 * *(profile1 + i), "G1 payoffs were wrong.");
     }
     free(poffs1);
     
@@ -435,7 +437,7 @@ test_game_create_destroy()
     
     poffs2 = game2->payoffs(2, profile23);
     for (i = 0; i < game2->players; i++){
-        mu_assert(*(poffs2 + i) == 0, "G2 payoffs were wrong.");
+        mu_assert(*(poffs2 + i) == 2 * *(profile23 + i), "G2 payoffs were wrong.");
     }
     free(poffs2);
     
@@ -451,7 +453,7 @@ test_game_create_destroy()
     
     poffs3 = game3->payoffs(2, profile23);
     for (i = 0; i < game3->players; i++){
-        mu_assert(*(poffs3 + i) == 0, "G3 payoffs were wrong.");
+        mu_assert(*(poffs3 + i) == 2 * *(profile23 + i), "G3 payoffs were wrong.");
     }
     free(poffs3);
     
@@ -504,7 +506,301 @@ test_game_popcollection()
     return NULL;
 }
 
-//TODO: tests for the actual dynamics
+void
+dummy_callback(game_t * game, int generation, popcollection_t *popc)
+{
+    printf("game players: %i\n", game->players);
+    printf("generation: %i\n", generation);
+    printf("populations: %i\n", popc->size);
+}
+
+double *
+pd_payoffs(int players, int * profile){
+    double payoffs[2][2] = {
+        {3, 0},
+        {4, 1}
+    };
+    
+    assert(players == 2);
+    assert(*(profile) == 0 || *(profile) == 1);
+    assert(*(profile + 1) == 0 || *(profile + 1) == 1);
+    
+    double * act_payoffs = malloc(players * sizeof(double));
+    
+    *(act_payoffs) = payoffs[*(profile)][*(profile + 1)];
+    *(act_payoffs + 1) = payoffs[*(profile + 1)][*(profile)]; 
+    
+    return act_payoffs;
+}
+
+char *
+test_payoffcache_create_destroy()
+{
+    int i, j, k;
+    int types[] = {2, 2};
+    double correct_cache[][2] = {
+        {3, 3},
+        {0, 4},
+        {4, 0},
+        {1, 1}
+    };
+    game_t *game = Game_create(2, 2, types, pd_payoffs);
+    strategyprofiles_t * sprofs = Game_StrategyProfiles_create(game);
+    
+    payoffcache_t *caches[2];
+    caches[0] = PayoffCache_create(game, NULL);
+    caches[1] = PayoffCache_create(game, sprofs);
+    
+    for (i = 0; i < 2; i++){
+        mu_assert((caches[i])->count == 4, "Cache size is wrong.");
+        mu_assert((caches[i])->payoff_cache != NULL, "Cache payoffs were null.");
+        for (j = 0; j < 4; j++){
+            for (k = 0; k < 2; k++){
+                mu_assert(*(*((caches[i])->payoff_cache + j) + k) == correct_cache[j][k], "Cache payoffs were wrong.");    
+            }
+        }
+    }
+    
+    PayoffCache_destroy(caches[0]);
+    PayoffCache_destroy(caches[1]);
+    StrategyProfiles_destroy(sprofs);
+    Game_destroy(game);
+    
+    return NULL;
+}
+
+char *
+test_earned_payoff_1pop()
+{
+    int types[] = {2, 2};
+    game_t *game = Game_create(2, 1, types, pd_payoffs);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game);
+    payoffcache_t *cache = PayoffCache_create(game, profiles);
+    popcollection_t *popc = Game_PopCollection_create(game);
+    
+    *((*(popc->populations))->proportions + 0) = 1;
+    *((*(popc->populations))->proportions + 1) = 0;
+    
+    mu_assert(earned_payoff(0, 0, popc, profiles, cache) == 3.0, "Earned payoff 1 pl 0 str 0 was wrong.");
+    mu_assert(earned_payoff(0, 1, popc, profiles, cache) == 4.0, "Earned payoff 1 pl 0 str 1 was wrong.");
+    mu_assert(earned_payoff(1, 0, popc, profiles, cache) == 3.0, "Earned payoff 1 pl 1 str 0 was wrong.");
+    mu_assert(earned_payoff(1, 1, popc, profiles, cache) == 4.0, "Earned payoff 1 pl 1 str 1 was wrong.");
+    
+    *((*(popc->populations))->proportions + 0) = 0.5;
+    *((*(popc->populations))->proportions + 1) = 0.5;
+    
+    mu_assert(earned_payoff(0, 0, popc, profiles, cache) == 1.5, "Earned payoff 2 pl 0 str 0 was wrong.");
+    mu_assert(earned_payoff(0, 1, popc, profiles, cache) == 2.5, "Earned payoff 2 pl 0 str 1 was wrong.");
+    mu_assert(earned_payoff(1, 0, popc, profiles, cache) == 1.5, "Earned payoff 2 pl 1 str 0 was wrong.");
+    mu_assert(earned_payoff(1, 1, popc, profiles, cache) == 2.5, "Earned payoff 2 pl 1 str 1 was wrong.");
+    
+    Game_destroy(game);
+    StrategyProfiles_destroy(profiles);
+    PayoffCache_destroy(cache);
+    PopCollection_destroy(popc);
+    
+    return NULL;
+}
+
+char *
+test_earned_payoff_2pop()
+{
+    int i;
+    int types[] = {2, 2};
+    game_t *game = Game_create(2, 2, types, pd_payoffs);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game);
+    payoffcache_t *cache = PayoffCache_create(game, profiles);
+    popcollection_t *popc = Game_PopCollection_create(game);
+    
+    for (i = 0; i < 2; i++){
+        *((*(popc->populations + i))->proportions + 0) = 1;
+        *((*(popc->populations + i))->proportions + 1) = 0;
+        
+    }
+    
+    mu_assert(earned_payoff(0, 0, popc, profiles, cache) == 3.0, "Earned payoff 1 pl 0 str 0 was wrong.");
+    mu_assert(earned_payoff(0, 1, popc, profiles, cache) == 4.0, "Earned payoff 1 pl 0 str 1 was wrong.");
+    mu_assert(earned_payoff(1, 0, popc, profiles, cache) == 3.0, "Earned payoff 1 pl 1 str 0 was wrong.");
+    mu_assert(earned_payoff(1, 1, popc, profiles, cache) == 4.0, "Earned payoff 1 pl 1 str 1 was wrong.");   
+    
+    for (i = 0; i < 2; i++){
+        *((*(popc->populations + i))->proportions + 0) = 0.5;
+        *((*(popc->populations + i))->proportions + 1) = 0.5;
+    }
+    
+    mu_assert(earned_payoff(0, 0, popc, profiles, cache) == 1.5, "Earned payoff 2 pl 0 str 0 was wrong.");
+    mu_assert(earned_payoff(0, 1, popc, profiles, cache) == 2.5, "Earned payoff 2 pl 0 str 1 was wrong.");
+    mu_assert(earned_payoff(1, 0, popc, profiles, cache) == 1.5, "Earned payoff 2 pl 1 str 0 was wrong.");
+    mu_assert(earned_payoff(1, 1, popc, profiles, cache) == 2.5, "Earned payoff 2 pl 1 str 1 was wrong.");
+    
+    Game_destroy(game);
+    StrategyProfiles_destroy(profiles);
+    PayoffCache_destroy(cache);
+    PopCollection_destroy(popc);
+    
+    return NULL;
+}
+
+char *
+test_average_earned_payoff_1pop()
+{
+    int types[] = {2, 2};
+    game_t *game = Game_create(2, 1, types, pd_payoffs);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game);
+    payoffcache_t *cache = PayoffCache_create(game, profiles);
+    popcollection_t *popc = Game_PopCollection_create(game);
+    
+    *((*(popc->populations))->proportions + 0) = 1;
+    *((*(popc->populations))->proportions + 1) = 0;
+    
+    mu_assert(average_earned_payoff(0, popc, profiles, cache) == 3.0, "Average Earned payoff 1 was wrong.");
+    
+    *((*(popc->populations))->proportions + 0) = 0.5;
+    *((*(popc->populations))->proportions + 1) = 0.5;
+    
+    mu_assert(average_earned_payoff(0, popc, profiles, cache) == 2.0, "Average Earned payoff 2 was wrong.");
+    
+    Game_destroy(game);
+    StrategyProfiles_destroy(profiles);
+    PayoffCache_destroy(cache);
+    PopCollection_destroy(popc);
+    
+    return NULL;
+}
+
+char *
+test_average_earned_payoff_2pop()
+{
+    int types[] = {2, 2};
+    game_t *game = Game_create(2, 2, types, pd_payoffs);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game);
+    payoffcache_t *cache = PayoffCache_create(game, profiles);
+    popcollection_t *popc = Game_PopCollection_create(game);
+    
+    *((*(popc->populations))->proportions + 0) = 1;
+    *((*(popc->populations))->proportions + 1) = 0;
+    
+    *((*(popc->populations + 1))->proportions + 0) = 1;
+    *((*(popc->populations + 1))->proportions + 1) = 0;
+    
+    mu_assert(average_earned_payoff(0, popc, profiles, cache) == 3.0, "Average Earned payoff 1-1 was wrong.");
+    mu_assert(average_earned_payoff(1, popc, profiles, cache) == 3.0, "Average Earned payoff 1-2 was wrong.");
+    
+    *((*(popc->populations))->proportions + 0) = 0.5;
+    *((*(popc->populations))->proportions + 1) = 0.5;
+    
+    *((*(popc->populations + 1))->proportions + 0) = 0.5;
+    *((*(popc->populations + 1))->proportions + 1) = 0.5;
+    
+    mu_assert(average_earned_payoff(0, popc, profiles, cache) == 2.0, "Average Earned payoff 2-1 was wrong.");
+    mu_assert(average_earned_payoff(1, popc, profiles, cache) == 2.0, "Average Earned payoff 2-2 was wrong.");
+    
+    Game_destroy(game);
+    StrategyProfiles_destroy(profiles);
+    PayoffCache_destroy(cache);
+    PopCollection_destroy(popc);
+    
+    return NULL;
+}
+
+char *
+test_update_population_proportions_1pop()
+{
+    int types[] = {2, 2};
+    game_t *game = Game_create(2, 1, types, pd_payoffs);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game);
+    payoffcache_t *cache = PayoffCache_create(game, profiles);
+    popcollection_t *popc = Game_PopCollection_create(game);
+    popcollection_t *popc2 = PopCollection_clone(popc);
+    
+    
+    *((*(popc->populations))->proportions + 0) = 0;
+    *((*(popc->populations))->proportions + 1) = 1;
+    
+    *((*(popc2->populations))->proportions + 0) = 0;
+    *((*(popc2->populations))->proportions + 1) = 0;
+    
+    update_population_proportions(0, 0, *(popc2->populations), popc, profiles, cache);
+    
+    mu_assert(*((*(popc2->populations))->proportions + 0) == 0, "Updating static population 0 was wrong.");
+    mu_assert(*((*(popc2->populations))->proportions + 1) == 1, "Updating static population 1 was wrong.");
+    
+    *((*(popc->populations))->proportions + 0) = 0.5;
+    *((*(popc->populations))->proportions + 1) = 0.5;
+    
+    *((*(popc2->populations))->proportions + 0) = 0;
+    *((*(popc2->populations))->proportions + 1) = 0;
+    
+    update_population_proportions(0, 0, *(popc2->populations), popc, profiles, cache);
+    
+    mu_assert(*((*(popc2->populations))->proportions + 0) == 0.375, "Updating dynamic population 0 was wrong.");
+    mu_assert(*((*(popc2->populations))->proportions + 1) == 0.625, "Updating dynamic population 1 was wrong.");
+    
+    Game_destroy(game);
+    StrategyProfiles_destroy(profiles);
+    PayoffCache_destroy(cache);
+    PopCollection_destroy(popc);
+    PopCollection_destroy(popc2);
+    
+    return NULL;
+}
+
+char *
+test_update_population_proportions_2pop()
+{
+    int i;
+    int types[] = {2, 2};
+    game_t *game = Game_create(2, 2, types, pd_payoffs);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game);
+    payoffcache_t *cache = PayoffCache_create(game, profiles);
+    popcollection_t *popc = Game_PopCollection_create(game);
+    popcollection_t *popc2 = PopCollection_clone(popc);
+    
+    for (i = 0; i < 2; i++){
+        *((*(popc->populations + i))->proportions + 0) = 0;
+        *((*(popc->populations + i))->proportions + 1) = 1;
+        
+        *((*(popc2->populations + i))->proportions + 0) = 0;
+        *((*(popc2->populations + i))->proportions + 1) = 0;
+    }
+    
+    for (i = 0; i < 2; i++){    
+        update_population_proportions(0, i, *(popc2->populations + i), popc, profiles, cache);
+        
+        mu_assert(*((*(popc2->populations + i))->proportions + 0) == 0, "Updating static population 0 was wrong.");
+        mu_assert(*((*(popc2->populations + i))->proportions + 1) == 1, "Updating static population 1 was wrong.");
+    }
+    
+    for (i = 0; i < 2; i++){
+        *((*(popc->populations + i))->proportions + 0) = 0.5;
+        *((*(popc->populations + i))->proportions + 1) = 0.5;
+        
+        *((*(popc2->populations + i))->proportions + 0) = 0;
+        *((*(popc2->populations + i))->proportions + 1) = 0;
+     }
+     
+     for (i = 0; i < 2; i++){   
+        update_population_proportions(0, i, *(popc2->populations + i), popc, profiles, cache);
+        
+        mu_assert(*((*(popc2->populations + i))->proportions + 0) == 0.375, "Updating dynamic population 0 was wrong.");
+        mu_assert(*((*(popc2->populations + i))->proportions + 1) == 0.625, "Updating dynamic population 1 was wrong.");
+    }
+    
+    Game_destroy(game);
+    StrategyProfiles_destroy(profiles);
+    PayoffCache_destroy(cache);
+    PopCollection_destroy(popc);
+    PopCollection_destroy(popc2);
+    
+    return NULL;
+}
+
+char *
+test_replicator_dynamics()
+{
+    //TODO    
+    return NULL;
+}
 
 char *
 all_tests() 
@@ -527,6 +823,15 @@ all_tests()
     mu_run_test(test_game_create_destroy);
     mu_run_test(test_game_strategyprofiles);
     mu_run_test(test_game_popcollection);
+    
+    mu_run_test(test_payoffcache_create_destroy);
+    mu_run_test(test_earned_payoff_1pop);
+    mu_run_test(test_earned_payoff_2pop);
+    mu_run_test(test_average_earned_payoff_1pop);
+    mu_run_test(test_average_earned_payoff_2pop);
+    mu_run_test(test_update_population_proportions_1pop);
+    mu_run_test(test_update_population_proportions_2pop);
+    //mu_run_test(test_replicator_dynamics);
 
     return NULL;
 }

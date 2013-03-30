@@ -34,7 +34,7 @@ $(TESTS):
 
 # The Unit Tests
 .PHONY: tests
-tests: CFLAGS += $(TARGET)
+#tests: CFLAGS += $(TARGET)
 tests: LFLAGS += -Lbuild -lreplicator_simulations
 tests: $(TESTS)
 	sh ./tests/runtests.sh
