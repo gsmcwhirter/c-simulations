@@ -379,6 +379,18 @@ test_strategyprofiles_create_destroy()
     return NULL;
 }
 
+double *
+dummy_payoffs(int players, int *profile)
+{
+    double * payoffs = malloc(players * sizeof(double));
+    int i;
+    for (i = 0; i < players; i++){
+        *(payoffs + i) = 0;
+    }
+    
+    return payoffs;
+}
+
 char *
 test_game_create_destroy()
 {
@@ -388,12 +400,60 @@ test_game_create_destroy()
     int types2[] = {4};
     int types3[] = {2, 4};
     
-    game1 = Game_create(1, 1, types1);
+    int profile1[] = {0};
+    int profile23[] = {0, 0};
     
-    game2 = Game_create(2, 1, types2);
+    double *poffs1, *poffs2, *poffs3;
     
-    game3 = Game_create(2, 2, types3);
+    int i;
     
+    game1 = Game_create(1, 1, types1, dummy_payoffs);
+    mu_assert(game1 != NULL, "GC returned NULL.");
+    mu_assert(game1->players == 1, "G1 players were wrong.");
+    mu_assert(game1->populations == 1, "G1 populations were wrong.");
+    mu_assert(game1->types != NULL, "G1 types were NULL.");
+    for (i = 0; i < game1->players; i++){
+        mu_assert(*(game1->types + i) == *types1, "G1 types were wrong.");
+    }
+    mu_assert(game1->payoffs != NULL, "G1 payoffs were NULL.");
+    
+    poffs1 = game1->payoffs(1, profile1);
+    for (i = 0; i < game1->players; i++){
+        mu_assert(*(poffs1 + i) == 0, "G1 payoffs were wrong.");
+    }
+    free(poffs1);
+    
+    game2 = Game_create(2, 1, types2, dummy_payoffs);
+    mu_assert(game2 != NULL, "GC returned NULL.");
+    mu_assert(game2->players == 2, "G2 players were wrong.");
+    mu_assert(game2->populations == 1, "G2 populations were wrong.");
+    mu_assert(game2->types != NULL, "G2 types were NULL.");
+    for (i = 0; i < game2->players; i++){
+        mu_assert(*(game2->types + i) == *types2, "G2 types were wrong.");
+    }
+    mu_assert(game2->payoffs != NULL, "G2 payoffs were NULL.");
+    
+    poffs2 = game2->payoffs(2, profile23);
+    for (i = 0; i < game2->players; i++){
+        mu_assert(*(poffs2 + i) == 0, "G2 payoffs were wrong.");
+    }
+    free(poffs2);
+    
+    game3 = Game_create(2, 2, types3, dummy_payoffs);
+    mu_assert(game3 != NULL, "GC returned NULL.");
+    mu_assert(game3->players == 2, "G3 players were wrong.");
+    mu_assert(game3->populations == 2, "G3 populations were wrong.");
+    mu_assert(game3->types != NULL, "G3 types were NULL.");
+    for (i = 0; i < game3->players; i++){
+        mu_assert(*(game3->types + i) == *(types3 + i), "G3 types were wrong.");
+    }
+    mu_assert(game3->payoffs != NULL, "G3 payoffs were NULL.");
+    
+    poffs3 = game3->payoffs(2, profile23);
+    for (i = 0; i < game3->players; i++){
+        mu_assert(*(poffs3 + i) == 0, "G3 payoffs were wrong.");
+    }
+    free(poffs3);
     
     Game_destroy(game1);
     Game_destroy(game2);
@@ -405,6 +465,19 @@ test_game_create_destroy()
 char *
 test_game_strategyprofiles()
 {
+    int types[] = {2, 3, 4};
+    int i;
+    game_t * game = Game_create(3, 3, types, dummy_payoffs);
+    strategyprofiles_t * sprofs = Game_StrategyProfiles_create(game);
+    mu_assert(sprofs != NULL, "GSPC returned NULL.");
+    mu_assert(sprofs->count == 24, "sprofs count was wrong.");
+    mu_assert(sprofs->size == 3, "sprofs size was wrong.");
+    for (i = 0; i < sprofs->size; i++){
+        mu_assert(*(sprofs->types + i) == *(types + i), "sprofs types were wrong.");
+    }
+    
+    StrategyProfiles_destroy(sprofs);
+    Game_destroy(game);
     
     return NULL;
 }
@@ -412,9 +485,26 @@ test_game_strategyprofiles()
 char *
 test_game_popcollection()
 {
+    int types[] = {2, 3, 4};
+    int i;
+    game_t * game = Game_create(3, 3, types, dummy_payoffs);
+    popcollection_t * pcoll = Game_PopCollection_create(game);
+    mu_assert(pcoll != NULL, "GPCC returned NULL.");
+    mu_assert(pcoll->size == 3, "pcoll size was wrong.");
+    mu_assert(pcoll->pop_sizes != NULL, "pcoll pop_sizes were NULL.");
+    for (i = 0; i < pcoll->size; i++){
+        mu_assert(*(pcoll->pop_sizes + i) == *(types + i), "pcoll pop_sizes were wrong.");
+    }
+    mu_assert(pcoll->populations != NULL, "pcoll populations were NULL.");
+    
+    PopCollection_destroy(pcoll);
+    
+    Game_destroy(game);
     
     return NULL;
 }
+
+//TODO: tests for the actual dynamics
 
 char *
 all_tests() 
