@@ -15,3 +15,7 @@
 # Test files
 tests/tests.log
 tests/*_tests
+
+# Make results
+build
+dist

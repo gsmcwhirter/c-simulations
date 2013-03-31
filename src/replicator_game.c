@@ -1,8 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include "replicator_population.h"
-#include "replicator_game.h"
+#include "replicator_dynamics/replicator_population.h"
+#include "replicator_dynamics/replicator_game.h"
     
 strategyprofiles_t *
 StrategyProfiles_create(int players, int *types){
@@ -39,9 +38,7 @@ StrategyProfiles_create(int players, int *types){
         assert(*(sprofs->player_strategy_profiles + i) != NULL);
     
         player_types = *(sprofs->types + i);
-        //printf("types: %i\n", player_types);
         tmp = sprofs->count / player_types;
-        //printf("tmp: %i\n", tmp);
         repeat_spread = sprofs->count / num_repeats;
         num_entries_per_repeat = repeat_spread / player_types;
         
@@ -53,7 +50,6 @@ StrategyProfiles_create(int players, int *types){
             
             for (l = 0; l < num_repeats; l++){
                 for (m = 0; m < num_entries_per_repeat; m++){
-                    //printf("strat count: %i\n", player_strat_count);
                     *(*(sprofs->profiles + l * repeat_spread + m + j * num_entries_per_repeat) + i) = j;
                     *(*(*(sprofs->player_strategy_profiles + i) + j) + player_strat_count) = l * repeat_spread + m + j * num_entries_per_repeat;
                     player_strat_count++; 
@@ -63,7 +59,6 @@ StrategyProfiles_create(int players, int *types){
         
         num_repeats = num_repeats * player_types;
     }
-    //printf("\n");
     
     return sprofs;
 }

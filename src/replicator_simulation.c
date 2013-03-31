@@ -1,11 +1,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
-#include "replicator_simulation.h"
-#include "replicator_population.h"
-#include "replicator_game.h"
-
-//#include <stdio.h>
+#include "replicator_dynamics/replicator_simulation.h"
+#include "replicator_dynamics/replicator_population.h"
+#include "replicator_dynamics/replicator_game.h"
 
 payoffcache_t * 
 PayoffCache_create(game_t *game, strategyprofiles_t *profiles)
@@ -142,19 +140,8 @@ earned_payoff(int player, int strategy, popcollection_t *pops, strategyprofiles_
             }
         }
         
-        /*
-        printf("profile prob: %f\n", profile_prob);
-        printf("profile_payoffs: %f\n", *(profile_payoffs + player));
-        */
-        
         payoff = payoff +  (*(profile_payoffs + player)) * profile_prob;
     }
-    
-    /*
-    printf("player: %i\n", player);
-    printf("strategy: %i\n", strategy);
-    printf("payoff: %f\n", payoff);
-    */
     
     return payoff;
 }

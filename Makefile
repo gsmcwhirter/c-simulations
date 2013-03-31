@@ -1,16 +1,17 @@
-CFLAGS=-g -O2 -Wall -Wextra -Isrc -rdynamic -DNDEBUG $(OPTFLAGS)
+CFLAGS=-g -O2 -Wall -Wextra -Iinclude -rdynamic -DNDEBUG $(OPTFLAGS)
 LFLAGS=-ldl -lm $(OPTLIBS)
 PREFIX?=/usr/local
 
 SOURCES=$(wildcard src/**/*.c src/*.c)
 OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
-HEADERS=$(patsubst %.c,%.h,$(SOURCES))
+HEADERS=$(wildcard include/**/*.h include/*.h)
 
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,$(TEST_SRC))
 
 TARGET=build/libreplicator_simulations.a
 SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
+DIST_NAME?=replicator_simulations
 
 # The Target Build
 all: $(TARGET) $(SO_TARGET)
@@ -40,7 +41,7 @@ test: $(TESTS)
 	
 # The Cleaner
 clean:
-	rm -rf build $(OBJECTS) $(TESTS)
+	rm -rf build dist $(OBJECTS) $(TESTS) dist/$(DIST_NAME).tar.gz
 	rm -f tests/tests.log
 	find . -name "*.gc*" -exec rm {} \;
 	rm -rf `find . -name "*.dSYM" -print`
@@ -58,3 +59,11 @@ BADFUNCS='[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?
 check:
 	@echo Files with potentially dangerous functions?
 	@egrep $(BADFUNCS) $(SOURCES) || true
+
+# The Packager
+dist: all
+	@mkdir -p dist/$(DIST_NAME)
+	cp $(TARGET) dist/$(DIST_NAME)
+	cp $(SO_TARGET) dist/$(DIST_NAME)
+	cp -r include dist/$(DIST_NAME)
+	tar czvfC dist/$(DIST_NAME).tar.gz dist $(DIST_NAME)

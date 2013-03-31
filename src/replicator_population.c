@@ -1,9 +1,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
-#include "replicator_population.h"
-#include "randomkit.h"
-#include "distributions.h"
+#include "replicator_dynamics/replicator_population.h"
+#include "replicator_dynamics/randomkit.h"
+#include "replicator_dynamics/distributions.h"
 
 population_t *
 Population_create(int size)
