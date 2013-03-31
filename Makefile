@@ -16,7 +16,7 @@ DIST_NAME?=replicator_simulations
 # The Target Build
 all: $(TARGET) $(SO_TARGET)
 
-dev: CFLAGS=-g -Wall -Isrc -Wall -Wextra $(OPTFLAGS)
+dev: CFLAGS=-g -Wall -Wextra -Iinclude -rdynamic $(OPTFLAGS)
 dev: all
 
 $(TARGET): CFLAGS += -fPIC
