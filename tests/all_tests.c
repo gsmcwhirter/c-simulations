@@ -889,6 +889,69 @@ test_replicator_dynamics_2pop()
 }
 
 char *
+test_serialization_pop()
+{
+    FILE *file = fopen("tests/pop.serial", "w");
+    assert(file != NULL);
+    
+    population_t *pop = Population_create(2);
+    *(pop->proportions) = 0.5;
+    *(pop->proportions + 1) = 0.5;
+    
+    Population_serialize(pop, file);
+    Population_destroy(pop);
+    fclose(file);
+    
+    FILE *file2 = fopen("tests/pop.serial", "r");
+    population_t * pop2 = Population_deserialize(file2);
+    fclose(file2);
+    mu_assert(pop2 != NULL, "Deserialization failed.");
+    mu_assert(pop2->size == 2, "Deserialized size was wrong.");
+    mu_assert(*(pop2->proportions) == 0.5, "Deserialized proportions were wrong.");
+    mu_assert(*(pop2->proportions + 1) == 0.5, "Deserialized proportions were wrong.");
+    
+    Population_destroy(pop2);
+    
+    return NULL;
+}
+
+char *
+test_serialization_coll()
+{
+    FILE *file = fopen("tests/coll.serial", "w");
+    assert(file != NULL);
+    
+    int types[] = {3, 2};
+    popcollection_t *coll = PopCollection_create(2, types);
+    *((*(coll->populations + 0))->proportions + 0) = 0.125;
+    *((*(coll->populations + 0))->proportions + 1) = 0.25;
+    *((*(coll->populations + 0))->proportions + 2) = 0.625;
+    
+    *((*(coll->populations + 1))->proportions + 0) = 0.33;
+    *((*(coll->populations + 1))->proportions + 1) = 0.67;
+    PopCollection_serialize(coll, file);
+    PopCollection_destroy(coll);
+    fclose(file);
+    
+    FILE *file2 = fopen("tests/coll.serial", "r");
+    popcollection_t *coll2 = PopCollection_deserialize(file2);
+    fclose(file2);
+    mu_assert(coll2 != NULL, "Deserialization failed.");
+    mu_assert(coll2->size == 2, "Deserialized size was wrong.");
+    mu_assert(coll2->pop_sizes != NULL, "Deserialized pop_sizes were NULL.");
+    mu_assert(*(coll2->pop_sizes) == 3, "Deserialized pop_sizes were wrong (0).");
+    mu_assert(*(coll2->pop_sizes + 1) == 2, "Deserialized pop_sizes were wrong (0).");
+    mu_assert(coll2->populations != NULL, "Deserialized populations was NULL.");
+    mu_assert(*((*(coll2->populations + 0))->proportions + 0) == 0.125, "Deserialized populations were wrong.");
+    mu_assert(*((*(coll2->populations + 0))->proportions + 1) == 0.25, "Deserialized populations were wrong.");
+    mu_assert(*((*(coll2->populations + 0))->proportions + 2) == 0.625, "Deserialized populations were wrong.");
+    mu_assert(*((*(coll2->populations + 1))->proportions + 0) == 0.33, "Deserialized populations were wrong.");
+    mu_assert(*((*(coll2->populations + 1))->proportions + 1) == 0.67, "Deserialized populations were wrong.");
+    
+    return NULL;
+}
+
+char *
 all_tests() 
 {
     mu_suite_start();
@@ -919,6 +982,9 @@ all_tests()
     mu_run_test(test_update_population_proportions_2pop);
     mu_run_test(test_replicator_dynamics_1pop);
     mu_run_test(test_replicator_dynamics_2pop);
+    
+    mu_run_test(test_serialization_pop);
+    mu_run_test(test_serialization_coll);
 
     return NULL;
 }

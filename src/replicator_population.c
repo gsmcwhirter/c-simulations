@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 #include "replicator_dynamics/replicator_population.h"
 #include "replicator_dynamics/randomkit.h"
@@ -128,6 +129,56 @@ Population_randomize(population_t *pop){
     free(diric);
 }
 
+const char pop_serial_prefix[] = "pop";
+
+void
+Population_serialize(population_t *pop, FILE *file)
+{
+    assert(pop != NULL);
+    assert(file != NULL);    
+    
+    unsigned int written;
+    written = fwrite(pop_serial_prefix, sizeof(char), 3, file);
+    written += fwrite(&(pop->size), sizeof(int), 1, file);
+    
+    assert(written == 4);
+    
+    written = fwrite(pop->proportions, sizeof(double), pop->size, file);
+    assert(written == pop->size);
+}
+
+population_t *
+Population_deserialize(FILE *file)
+{
+    //assume trying to read from the file wherever the file pointer is.
+    assert(file != NULL);
+    
+    char *prefix = malloc(sizeof(char) * 4);
+    *(prefix + 3) = '\0';
+    int size;
+    int reads;
+    
+    assert(prefix != NULL);
+    
+    reads = fread(prefix, sizeof(char), 3, file);
+    assert(reads == 3);
+    assert(!strcmp(prefix, pop_serial_prefix));
+    
+    free(prefix);
+    
+    reads = fread(&size, sizeof(int), 1, file);
+    assert(reads == 1);
+    assert(size > 0);
+    
+    population_t *pop = Population_create(size);
+    assert(pop != NULL);
+    
+    reads = fread(pop->proportions, sizeof(double), pop->size, file);
+    assert(reads == pop->size);
+    
+    return pop;
+}
+
 popcollection_t *
 PopCollection_create(int num_pops, int *sizes)
 {
@@ -215,4 +266,68 @@ PopCollection_randomize(popcollection_t *coll)
     for (i = 0; i < coll->size; i++){
         Population_randomize(*(coll->populations + i));
     }
+}
+
+const char col_serial_prefix[] = "col";
+
+void
+PopCollection_serialize(popcollection_t *coll, FILE *file)
+{
+    assert(coll != NULL);
+    assert(file != NULL);    
+    
+    unsigned int written;
+    written = fwrite(col_serial_prefix, sizeof(char), 3, file);
+    written += fwrite(&(coll->size), sizeof(int), 1, file);
+    written += fwrite(coll->pop_sizes, sizeof(int), coll->size, file);
+    assert(written == (4 + coll->size));
+    
+    int i;
+    for (i = 0; i < coll->size; i++){
+        Population_serialize(*(coll->populations + i), file);
+    }
+}
+
+popcollection_t *
+PopCollection_deserialize(FILE *file)
+{
+    //assume trying to read from the file wherever the file pointer is.
+    assert(file != NULL);
+    
+    char *prefix = malloc(sizeof(char) * 4);
+    *(prefix + 3) = '\0';
+    int size;
+    int *types;
+    int reads;
+    
+    assert(prefix != NULL);
+    
+    reads = fread(prefix, sizeof(char), 3, file);
+    assert(reads == 3);
+    assert(!strcmp(prefix, col_serial_prefix));
+    
+    free(prefix);
+    
+    reads = fread(&size, sizeof(int), 1, file);
+    assert(reads == 1);
+    assert(size > 0);
+    
+    types = malloc(sizeof(int) * size);
+    assert(types != NULL);
+    reads = fread(types, sizeof(int), size, file);
+    assert(reads == size);
+    
+    popcollection_t * coll = PopCollection_create(size, types);
+    assert(coll != NULL);
+    
+    population_t * tmppop = Population_create(1);
+    int i;
+    for (i = 0; i < coll->size; i++){
+        Population_destroy(tmppop);
+        tmppop = Population_deserialize(file);
+        Population_copy(*(coll->populations + i), tmppop);
+    }
+    Population_destroy(tmppop);
+    
+    return coll;
 }

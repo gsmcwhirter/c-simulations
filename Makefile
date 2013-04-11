@@ -42,7 +42,7 @@ test: $(TESTS)
 # The Cleaner
 clean:
 	rm -rf build dist $(OBJECTS) $(TESTS) dist/$(DIST_NAME).tar.gz
-	rm -f tests/tests.log
+	rm -f tests/tests.log tests/*.serial
 	find . -name "*.gc*" -exec rm {} \;
 	rm -rf `find . -name "*.dSYM" -print`
 

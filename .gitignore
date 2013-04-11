@@ -15,6 +15,7 @@
 # Test files
 tests/tests.log
 tests/*_tests
+tests/*.serial
 
 # Make results
 build
