@@ -42,7 +42,7 @@
  */
 
 #include <math.h>
-#include "distributions.h"
+#include "replicator_dynamics/distributions.h"
 #include <stdio.h>
 
 #ifndef min
