@@ -320,6 +320,8 @@ PopCollection_deserialize(FILE *file)
     popcollection_t * coll = PopCollection_create(size, types);
     assert(coll != NULL);
     
+    free(types);
+    
     population_t * tmppop = Population_create(1);
     int i;
     for (i = 0; i < coll->size; i++){

@@ -947,6 +947,7 @@ test_serialization_coll()
     mu_assert(*((*(coll2->populations + 0))->proportions + 2) == 0.625, "Deserialized populations were wrong.");
     mu_assert(*((*(coll2->populations + 1))->proportions + 0) == 0.33, "Deserialized populations were wrong.");
     mu_assert(*((*(coll2->populations + 1))->proportions + 1) == 0.67, "Deserialized populations were wrong.");
+    PopCollection_destroy(coll2);
     
     return NULL;
 }
