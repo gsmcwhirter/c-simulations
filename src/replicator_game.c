@@ -193,9 +193,7 @@ StrategyProfiles_destroy(strategyprofiles_t *sprofs){
             free(sprofs->player_strategy_profiles);
         }
         
-        free(sprofs->types);
-        
-        
+        free(sprofs->types);        
         
         free(sprofs);
         sprofs = NULL;

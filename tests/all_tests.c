@@ -1001,7 +1001,7 @@ test_update_population_proportions_1pop()
     *((*(popc2->populations))->proportions + 0) = 0;
     *((*(popc2->populations))->proportions + 1) = 0;
     
-    update_population_proportions(0, 0, *(popc2->populations), popc, profiles, cache);
+    update_population_proportions(0, 0, *(popc2->populations), popc, profiles, cache, NULL);
     
     mu_assert(*((*(popc2->populations))->proportions + 0) == 0, "Updating static population 0 was wrong.");
     mu_assert(*((*(popc2->populations))->proportions + 1) == 1, "Updating static population 1 was wrong.");
@@ -1012,7 +1012,7 @@ test_update_population_proportions_1pop()
     *((*(popc2->populations))->proportions + 0) = 0;
     *((*(popc2->populations))->proportions + 1) = 0;
     
-    update_population_proportions(0, 0, *(popc2->populations), popc, profiles, cache);
+    update_population_proportions(0, 0, *(popc2->populations), popc, profiles, cache, NULL);
     
     mu_assert(*((*(popc2->populations))->proportions + 0) == 0.375, "Updating dynamic population 0 was wrong.");
     mu_assert(*((*(popc2->populations))->proportions + 1) == 0.625, "Updating dynamic population 1 was wrong.");
@@ -1046,7 +1046,7 @@ test_update_population_proportions_2pop()
     }
     
     for (i = 0; i < 2; i++){    
-        update_population_proportions(0, i, *(popc2->populations + i), popc, profiles, cache);
+        update_population_proportions(0, i, *(popc2->populations + i), popc, profiles, cache, NULL);
         
         mu_assert(*((*(popc2->populations + i))->proportions + 0) == 0, "Updating static population 0 was wrong.");
         mu_assert(*((*(popc2->populations + i))->proportions + 1) == 1, "Updating static population 1 was wrong.");
@@ -1061,7 +1061,7 @@ test_update_population_proportions_2pop()
      }
      
      for (i = 0; i < 2; i++){   
-        update_population_proportions(0, i, *(popc2->populations + i), popc, profiles, cache);
+        update_population_proportions(0, i, *(popc2->populations + i), popc, profiles, cache, NULL);
         
         mu_assert(*((*(popc2->populations + i))->proportions + 0) == 0.375, "Updating dynamic population 0 was wrong.");
         mu_assert(*((*(popc2->populations + i))->proportions + 1) == 0.625, "Updating dynamic population 1 was wrong.");

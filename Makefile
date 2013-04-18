@@ -1,4 +1,4 @@
-CFLAGS=-g -O2 -Wall -Wextra -Iinclude -rdynamic -DNDEBUG $(OPTFLAGS)
+CFLAGS=-g -fopenmp -O2 -Wall -Wextra -Iinclude -rdynamic -DNDEBUG $(OPTFLAGS)
 LFLAGS=-ldl -lm $(OPTLIBS)
 PREFIX?=/usr/local
 

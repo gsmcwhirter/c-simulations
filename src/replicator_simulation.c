@@ -7,55 +7,114 @@
 
 #include <stdio.h>
 
+#ifdef _OPENMP
+#include <omp.h>
+#define OMP 1
+#else
+#define OMP 0
+#endif
+
+#ifndef OMP_NUM_THREADS
+#define AUTO_THREAD 1
+#else
+#define AUTO_THREAD 0
+#endif
+
+int num_procs;
+int max_threads;
+
 popcollection_t *
 replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, double effective_zero, int max_generations, cache_mask caching, cb_func on_generation)
-{
-    printf("test\n");
+{   
     int free_start = 0;
     assert(game != NULL);
+    
+    if (OMP){
+        if (AUTO_THREAD){
+            num_procs = omp_get_num_procs();
+            max_threads = num_procs - 1;
+        }
+        else {
+            max_threads = omp_get_max_threads();
+        }
+    }
+    else {
+        max_threads = 1;
+    }
     
     if (start_pops == NULL){
         start_pops = Game_PopCollection_create(game);
         PopCollection_randomize(start_pops);
         free_start = 1;
     }
-    
-    return start_pops;
-    
-    /*
+        
     int generation = 0;
     
     popcollection_t * curr_pops = PopCollection_clone(start_pops);
     popcollection_t * next_pops = PopCollection_clone(start_pops);
     popcollection_t * end_pops = PopCollection_clone(start_pops);
     
-    printf("pops ok\n");
+    //printf("pops ok\n");
     
     strategyprofiles_t *profiles = Game_StrategyProfiles_create(game, caching);
     assert(profiles != NULL);
     
-    printf("profiles ok\n");
+    //printf("profiles ok\n");
     
     payoffcache_t *payoff_cache = PayoffCache_create(game, profiles, caching);
     assert(payoff_cache != NULL);
     
-    printf("payoffs ok\n");
+    //printf("payoffs ok\n");
     
     int i;
     
     PopCollection_copy(next_pops, start_pops);
+    
+    #ifdef _OPENMP
+    int threads = next_pops->size;
+    if (threads > max_threads){
+        threads = max_threads;
+    }
+    
+    int *subthreads = malloc(next_pops->size * sizeof(int));
+    if (next_pops->size > 1){
+        int available_threads = max_threads - threads;
+        float weight = 0;
+        for (i = 0; i < next_pops->size; i++){
+            weight += (float)((*(next_pops->populations + i))->size);
+        }
+        
+        for (i = 0; i < next_pops->size; i++){
+            *(subthreads + i) = (int)(((float)((*(next_pops->populations + i))->size) / weight * (float)available_threads));
+        }
+    }
+    #endif
     
     do {
         generation++;
         PopCollection_copy(curr_pops, next_pops);
         
         if (next_pops->size == 1){
-            update_population_proportions(alpha, 0, *(next_pops->populations), curr_pops, profiles, payoff_cache);
+            update_population_proportions(alpha, 0, *(next_pops->populations), curr_pops, profiles, payoff_cache, &max_threads);
         }
         else {
-            for (i = 0; i < next_pops->size; i++){
-                update_population_proportions(alpha, i, *(next_pops->populations + i), curr_pops, profiles, payoff_cache);
-            } 
+            #ifdef _OPENMP
+            omp_set_num_threads(threads);
+            #pragma omp parallel 
+            {
+                #pragma omp for
+            #endif
+                for (i = 0; i < next_pops->size; i++){
+                    #ifdef _OPENMP
+                    update_population_proportions(alpha, i, *(next_pops->populations + i), curr_pops, profiles, payoff_cache, subthreads + i);
+                    #else
+                    update_population_proportions(alpha, i, *(next_pops->populations + i), curr_pops, profiles, payoff_cache, NULL);
+                    #endif
+                }
+            #ifdef _OPENMP
+            }
+            #endif
+            
         }
         
         if (on_generation != NULL){
@@ -63,9 +122,13 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
         }
     } while((max_generations == 0 || generation < max_generations) && !PopCollection_equal(curr_pops, next_pops, effective_zero));
     
+    #ifdef _OPENMP
+    free(subthreads); 
+    #endif
+    
     PopCollection_copy(end_pops, next_pops);
     
-    printf("sims ok\n");
+    //printf("sims ok\n");
     
     PopCollection_destroy(curr_pops);
     PopCollection_destroy(next_pops);
@@ -77,7 +140,6 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
     }
     
     return end_pops;
-    */
 }
 
 double
@@ -145,7 +207,7 @@ average_earned_payoff(int player, popcollection_t *pops, strategyprofiles_t *pro
 }
 
 void 
-update_population_proportions(double alpha, int player, population_t *pop, popcollection_t *curr_pops, strategyprofiles_t *profiles, payoffcache_t *payoff_cache)
+update_population_proportions(double alpha, int player, population_t *pop, popcollection_t *curr_pops, strategyprofiles_t *profiles, payoffcache_t *payoff_cache, int *threads)
 {
     assert(pop != NULL);
     assert(curr_pops != NULL);
@@ -162,12 +224,32 @@ update_population_proportions(double alpha, int player, population_t *pop, popco
     }
 
     int strategy;
-    for (strategy = 0; strategy < pop->size; strategy++){
-        if (*((*(curr_pops->populations + offset))->proportions + strategy) != 0){
-            *(pop->proportions + strategy) = (*((*(curr_pops->populations + offset))->proportions + strategy)) * (alpha + earned_payoff(player, strategy, curr_pops, profiles, payoff_cache)) / (alpha + average_earned_payoff(player, curr_pops, profiles, payoff_cache));
+    int c = pop->size;
+    #ifdef _OPENMP
+    //printf("OMP\n");
+    //printf("Subthreads ptr: %p\n", threads);
+    if (threads != NULL){
+        if (*threads > 0){
+            omp_set_num_threads(*threads);
         }
-        else {
-            *(pop->proportions + strategy) = 0;
+        else if (*threads == 0){
+            omp_set_num_threads(1);
         }
+    } 
+    
+    #pragma omp parallel
+    {
+        #pragma omp for
+    #endif
+        for (strategy = 0; strategy < c; strategy++){
+            if (*((*(curr_pops->populations + offset))->proportions + strategy) != 0){
+                *(pop->proportions + strategy) = (*((*(curr_pops->populations + offset))->proportions + strategy)) * (alpha + earned_payoff(player, strategy, curr_pops, profiles, payoff_cache)) / (alpha + average_earned_payoff(player, curr_pops, profiles, payoff_cache));
+            }
+            else {
+                *(pop->proportions + strategy) = 0;
+            }
+        }
+    #ifdef _OPENMP
     }
+    #endif
 }
