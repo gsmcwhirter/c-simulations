@@ -14,10 +14,10 @@
 #define OMP 0
 #endif
 
-#ifndef OMP_NUM_THREADS
-#define AUTO_THREAD 1
-#else
+#ifdef OMP_STATIC_THREADS
 #define AUTO_THREAD 0
+#else
+#define AUTO_THREAD 1
 #endif
 
 extern int simulation_num_procs = 1;
@@ -29,12 +29,16 @@ void
 replicator_dynamics_setup()
 {
     if (OMP){
+        simulation_num_procs = omp_get_num_procs();
         if (AUTO_THREAD){
-            simulation_num_procs = omp_get_num_procs();
-            simulation_max_threads = simulation_num_procs - 1;
+            printf("Auto thread calc.\n");
+            omp_set_dynamic(1);
+            simulation_max_threads = omp_get_max_threads();
         }
         else {
-            simulation_max_threads = omp_get_max_threads();
+            printf("Manual thread calc.\n");
+            omp_set_dynamic(0);
+            simulation_max_threads = simulation_num_procs - 1;
         }
     }
     else {
@@ -89,8 +93,9 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
     }
     
     int *subthreads = malloc(next_pops->size * sizeof(int));
+    int available_threads = 0;
     if (next_pops->size > 1){
-        int available_threads = simulation_max_threads - threads;
+        available_threads = simulation_max_threads - threads;
         float weight = 0;
         for (i = 0; i < next_pops->size; i++){
             weight += (float)((*(next_pops->populations + i))->size);
@@ -99,6 +104,13 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
         for (i = 0; i < next_pops->size; i++){
             *(subthreads + i) = (int)(((float)((*(next_pops->populations + i))->size) / weight * (float)available_threads));
         }
+    }
+    
+    printf("Main threads: %i\n", threads);
+    printf("Available threads: %i\n", available_threads);
+    printf("Threading distribution:\n");
+    for (i = 0; i < next_pops->size; i++){
+        printf("\tPop %i: %i\n", i, *(subthreads + i));
     }
     #endif
     
@@ -240,17 +252,22 @@ update_population_proportions(double alpha, int player, population_t *pop, popco
     #ifdef _OPENMP
     //printf("OMP\n");
     //printf("Subthreads ptr: %p\n", threads);
+    
     if (threads != NULL){
-        if (*threads > 0){
-            omp_set_num_threads(*threads);
-        }
-        else if (*threads == 0){
-            omp_set_num_threads(1);
-        }
-    } 
+        printf("Threads value: %i\n", *threads);
+    }
+    
+    if (threads != NULL && (*threads) > 0){
+        printf("Setting omp_set_num_threads to %i\n", *threads);
+        omp_set_num_threads(*threads);
+    }
+    else {
+        omp_set_num_threads(1);
+    }
     
     #pragma omp parallel
     {
+        printf("Using %i threads...\n", omp_get_num_threads());
         #pragma omp for
     #endif
         for (strategy = 0; strategy < c; strategy++){
