@@ -5,7 +5,7 @@
 #include "replicator_dynamics/replicator_population.h"
 #include "replicator_dynamics/replicator_game.h"
 
-#include <stdio.h>
+//#include <stdio.h>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -32,12 +32,12 @@ replicator_dynamics_setup()
         omp_set_nested(1);
         simulation_num_procs = omp_get_num_procs();
         if (AUTO_THREAD){
-            printf("Auto thread calc.\n");
+            //printf("Auto thread calc.\n");
             omp_set_dynamic(1);
             simulation_max_threads = omp_get_max_threads();
         }
         else {
-            printf("Manual thread calc.\n");
+            //printf("Manual thread calc.\n");
             omp_set_dynamic(0);
             simulation_max_threads = simulation_num_procs - 1;
         }
@@ -107,12 +107,14 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
         }
     }
     
+    /*
     printf("Main threads: %i\n", threads);
     printf("Available threads: %i\n", available_threads);
     printf("Threading distribution:\n");
     for (i = 0; i < next_pops->size; i++){
         printf("\tPop %i: %i\n", i, *(subthreads + i));
     }
+    */
     #endif
     
     do {
@@ -255,23 +257,23 @@ update_population_proportions(double alpha, int player, population_t *pop, popco
     //printf("OMP\n");
     //printf("Subthreads ptr: %p\n", threads);
     
+    /*
     if (threads != NULL){
         printf("Threads value: %i\n", *threads);
     }
+    */
     
     if (threads != NULL && (*threads) > 0){
-        printf("Setting omp_set_num_threads to %i\n", *threads);
-        //omp_set_num_threads(*threads);
-        thr = *threads;
+        //printf("Setting omp_set_num_threads to %i\n", *threads);
+        omp_set_num_threads(*threads);
     }
     else {
-        thr = 1;
-        //omp_set_num_threads(1);
+        omp_set_num_threads(1);
     }
     
-    #pragma omp parallel num_threads(thr)
+    #pragma omp parallel
     {
-        printf("Using %i threads...\n", omp_get_num_threads());
+        //printf("Using %i threads...\n", omp_get_num_threads());
         #pragma omp for
     #endif
         for (strategy = 0; strategy < c; strategy++){
