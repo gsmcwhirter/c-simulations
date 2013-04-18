@@ -11,6 +11,7 @@ PayoffCache_create(game_t *game, strategyprofiles_t *profiles)
     assert(game != NULL);
     
     int i;
+    int *profile;
     
     int free_profiles = 0;
     if (profiles == NULL){
@@ -28,7 +29,10 @@ PayoffCache_create(game_t *game, strategyprofiles_t *profiles)
     for (i = 0; i < profiles->count; i++){ 
         assert(*(cache->payoff_cache + i) != NULL);
         
-        *(cache->payoff_cache + i) = game->payoffs(profiles->size, *(profiles->profiles + i)); 
+        profile = StrategyProfiles_getProfile(profiles, i);
+        //*(cache->payoff_cache + i) = game->payoffs(profiles->size, *(profiles->profiles + i));
+        *(cache->payoff_cache + i) = game->payoffs(profiles->size, profile);
+        free(profile); 
     }
     
     if (free_profiles){
@@ -125,8 +129,10 @@ earned_payoff(int player, int strategy, popcollection_t *pops, strategyprofiles_
     int pl_i;
     for (profile_index = 0; profile_index < num_profiles; profile_index++){
         profile_prob = 1;
-        profile_number = *(*(*(profiles->player_strategy_profiles + player) + strategy) + profile_index);
-        profile = *(profiles->profiles + profile_number);
+        //profile_number = *(*(*(profiles->player_strategy_profiles + player) + strategy) + profile_index);
+        profile_number = StrategyProfiles_getPlayerProfileNumber(profiles, player, strategy, profile_index); 
+        //profile = *(profiles->profiles + profile_number);
+        profile = StrategyProfiles_getProfile(profiles, profile_number);
         profile_payoffs = *(payoff_cache->payoff_cache + profile_number);
         
         for (pl_i = 0; pl_i < profiles->size; pl_i++){
@@ -141,6 +147,7 @@ earned_payoff(int player, int strategy, popcollection_t *pops, strategyprofiles_
         }
         
         payoff = payoff +  (*(profile_payoffs + player)) * profile_prob;
+        free(profile);
     }
     
     return payoff;

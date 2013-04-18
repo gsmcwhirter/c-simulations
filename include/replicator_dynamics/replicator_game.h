@@ -9,13 +9,16 @@ struct StrategyProfiles {
     int count;
     int size;
     int *types;
-    int **profiles;
-    int ***player_strategy_profiles;
+    //int **profiles;
+    //int ***player_strategy_profiles;
 };
 
 typedef struct StrategyProfiles strategyprofiles_t;
 
 strategyprofiles_t * StrategyProfiles_create(int players, int *types);
+int * StrategyProfiles_getProfile(strategyprofiles_t *sprofs, int num);
+int * StrategyProfiles_getPlayerProfile(strategyprofiles_t *sprofs, int player, int strategy, int num);
+int StrategyProfiles_getPlayerProfileNumber(strategyprofiles_t *sprofs, int player, int strategy, int num);
 void StrategyProfiles_destroy(strategyprofiles_t *sprofs);
 
 struct Game {

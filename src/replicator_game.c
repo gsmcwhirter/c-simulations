@@ -14,13 +14,15 @@ StrategyProfiles_create(int players, int *types){
     sprofs->size = players;
     sprofs->types = malloc(players * sizeof(int));
     
-    int i, j, l, m, player_types, num_repeats, num_entries_per_repeat, repeat_spread, tmp, player_strat_count; 
+    int i;
+    //int j, l, m, player_types, num_repeats, num_entries_per_repeat, repeat_spread, tmp, player_strat_count; 
     
     for (i = 0; i < players; i++){
         sprofs->count = *(types + i) * sprofs->count;
         *(sprofs->types + i) = *(types + i);
     }
     
+    /*
     sprofs->profiles = malloc(sprofs->count * sizeof(int*));
     assert(sprofs->profiles != NULL);
     
@@ -59,13 +61,81 @@ StrategyProfiles_create(int players, int *types){
         
         num_repeats = num_repeats * player_types;
     }
+    */
     
     return sprofs;
+}
+
+int *
+StrategyProfiles_getProfile(strategyprofiles_t *sprofs, int num)
+{
+    assert(sprofs != NULL);
+    int *profile = malloc(sprofs->size * sizeof(int));
+    int i;
+    
+    int num_repeats = 1;
+    int repeat_spread, num_entries_per_repeat;
+    for (i = 0; i < sprofs->size; i++){
+        repeat_spread = sprofs->count / num_repeats;
+        num_entries_per_repeat = repeat_spread / *(sprofs->types + i);
+        
+        //num == l * repeat_spread + m + j * num_entries_per_repeat
+        //j = (num - l * repeat_spread - m) / num_entries_per_repeat
+        //set m = 0, l = 0
+        *(profile + i) = (num % repeat_spread) / num_entries_per_repeat;
+        
+        num_repeats = num_repeats * (*(sprofs->types + i));
+    }
+    
+    return profile;
+}
+
+
+int *
+StrategyProfiles_getPlayerProfile(strategyprofiles_t *sprofs, int player, int strategy, int num)
+{       
+    return StrategyProfiles_getProfile(sprofs, StrategyProfiles_getPlayerProfileNumber(sprofs, player, strategy, num));
+}
+
+int 
+StrategyProfiles_getPlayerProfileNumber(strategyprofiles_t *sprofs, int player, int strategy, int num)
+{
+    assert(sprofs != NULL);
+    
+    /*
+    num = l * num_entries_per_repeat + m
+    m = num % num_entries_per_repeat
+    l * num_entries_per_repeat = num - m
+    num_entries_per_repeat = repeat_spread / *(sprofs->types + player)
+    l * repeat_spread = (num - m) * (*(sprofs->types + player))
+    num2 = l * repeat_spread + m + strategy * num_entries_per_repeat
+    num2 = (num - m) * (*(sprofs->types + player)) + m + strategy * num_entries_per_repeat
+    num2 = (num - m) * (*(sprofs->types + player)) + m + strategy * repeat_spread / *(sprofs->types + player)
+    */
+    int num2;
+    int m;
+    int i;
+    int num_repeats;
+    int repeat_spread;
+    int num_entries_per_repeat;
+    
+    num_repeats = 1;
+    for (i = 0; i < player; i++){
+        num_repeats = num_repeats * (*(sprofs->types + i));
+    }
+    repeat_spread = (sprofs->count) / num_repeats;
+    num_entries_per_repeat = repeat_spread / (*(sprofs->types + player));
+    
+    m = num % num_entries_per_repeat;
+    num2 = (num - m) * (*(sprofs->types + player)) + m + strategy * repeat_spread / (*(sprofs->types + player));
+    
+    return num2;
 }
 
 void
 StrategyProfiles_destroy(strategyprofiles_t *sprofs){
     if (sprofs != NULL){
+        /*
         int i, j;
         for (i = 0; i < sprofs->count; i++){
             free(*(sprofs->profiles + i));
@@ -79,7 +149,10 @@ StrategyProfiles_destroy(strategyprofiles_t *sprofs){
             free(*(sprofs->player_strategy_profiles + i));
         }
         free(sprofs->player_strategy_profiles);
+        */
         free(sprofs->types);
+        
+        
         
         free(sprofs);
         sprofs = NULL;

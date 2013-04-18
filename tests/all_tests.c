@@ -251,7 +251,7 @@ test_strategyprofiles_create_destroy()
     int types1[] = {2};
     int types2[] = {2, 3};
     int types3[] = {2, 2, 2};
-    int i, j, k, c, pspindex;
+    int i, j, k, l, c, pspindex;
     
     int profiles1[][1] = {
         {0},
@@ -263,7 +263,7 @@ test_strategyprofiles_create_destroy()
         {0, 2},
         {1, 0},
         {1, 1},
-        {1, 2}  
+        {1, 2}
     };
     int profiles3[][3] = {
         {0, 0, 0},
@@ -291,28 +291,41 @@ test_strategyprofiles_create_destroy()
         0, 2, 4, 6, 1, 3, 5, 7
     }; // strat# * player_types + k + player# * count
     
+    int *profile, *profile2;
+    
     pr1 = StrategyProfiles_create(1, types1);
     mu_assert(pr1 != NULL, "SP_create returned NULL for 1 player.");
     mu_assert(pr1->size == 1, "1 player size is wrong.");
     mu_assert(pr1->count == 2, "1 player count is wrong.");
     mu_assert(pr1->types != NULL, "1 player types are NULL.");
     mu_assert(*(pr1->types) == 2, "1 player types are wrong.");
-    mu_assert(pr1->profiles != NULL, "1 player profiles are NULL.");
+    //mu_assert(pr1->profiles != NULL, "1 player profiles are NULL.");
     for (i = 0; i < pr1->count; i++){
-        mu_assert((pr1->profiles + i) != NULL, "1 player profile entry is NULL.");
+        profile = StrategyProfiles_getProfile(pr1, i);
+        mu_assert(profile != NULL, "1 player profile entry is NULL.");
         for (j = 0; j < pr1->size; j++){
-            mu_assert(*(*(pr1->profiles + i) + j) == *(*(profiles1 + i) + j), "1 player profile entries are wrong.");
+            mu_assert(*(profile + j) == *(*(profiles1 + i) + j), "1 player profile entries are wrong.");
         }
+        free(profile);
     }
-    mu_assert(pr1->player_strategy_profiles != NULL, "1 player strategy profiles are NULL.");
+    //mu_assert(pr1->player_strategy_profiles != NULL, "1 player strategy profiles are NULL.");
     for (i = 0; i < pr1->size; i++){
-        mu_assert(*(pr1->player_strategy_profiles + i) != NULL, "1 player psp player entry NULL.");
+        //mu_assert(*(pr1->player_strategy_profiles + i) != NULL, "1 player psp player entry NULL.");
         for (j = 0; j < *(pr1->types + i); j++){
-            mu_assert(*(*(pr1->player_strategy_profiles + i) + j) != NULL, "1 player psp player strat entry NULL.");
+            //mu_assert(*(*(pr1->player_strategy_profiles + i) + j) != NULL, "1 player psp player strat entry NULL.");
             c = pr1->count / *(pr1->types + i);
             for (k = 0; k < c; k++){
+                profile = StrategyProfiles_getPlayerProfile(pr1, i, j, k);
+                mu_assert(profile != NULL, "1 player psp player strat entry was NULL.");
                 pspindex = (i * pr1->count) + j * c + k;
-                mu_assert(*(*(*(pr1->player_strategy_profiles + i) + j) + k) == psps1[pspindex], "1 player psp player strat entry wrong.");
+                profile2 = *(profiles1 + psps1[pspindex]);
+                
+                for (l = 0; l < pr1->size; l++){
+                    mu_assert(*(profile + l) == *(profile2 + l), "1 player psp player strat entry wrong.");
+                }
+                
+                free(profile);
+                //mu_assert(*(*(*(pr1->player_strategy_profiles + i) + j) + k) == psps1[pspindex], "1 player psp player strat entry wrong.");
             }
         }
     }
@@ -326,23 +339,36 @@ test_strategyprofiles_create_destroy()
     for (i = 0; i < pr2->size; i++){
         mu_assert(*(pr2->types + i) == *(types2 + i), "2 player types are wrong.");
     }
-    mu_assert(pr2->profiles != NULL, "2 player profiles are NULL.");
+    //mu_assert(pr2->profiles != NULL, "2 player profiles are NULL.");
     for (i = 0; i < pr2->count; i++){
-        mu_assert((pr2->profiles + i) != NULL, "2 player profile entry is NULL.");
+        profile = StrategyProfiles_getProfile(pr2, i);
+        mu_assert(profile != NULL, "2 player profile entry is NULL.");
         for (j = 0; j < pr2->size; j++){
-            mu_assert(*(*(pr2->profiles + i) + j) == *(*(profiles2 + i) + j), "2 player profile entries are wrong.");
+            mu_assert(*(profile + j) == *(*(profiles2 + i) + j), "2 player profile entries are wrong.");
         }
+        free(profile);
     }
     
-    mu_assert(pr2->player_strategy_profiles != NULL, "2 player strategy profiles are NULL.");
+    //mu_assert(pr2->player_strategy_profiles != NULL, "2 player strategy profiles are NULL.");
     for (i = 0; i < pr2->size; i++){
-        mu_assert(*(pr2->player_strategy_profiles + i) != NULL, "2 player psp player entry NULL.");
+        //mu_assert(*(pr2->player_strategy_profiles + i) != NULL, "2 player psp player entry NULL.");
         for (j = 0; j < *(pr2->types + i); j++){
-            mu_assert(*(*(pr2->player_strategy_profiles + i) + j) != NULL, "2 player psp player strat entry NULL.");
+            //mu_assert(*(*(pr2->player_strategy_profiles + i) + j) != NULL, "2 player psp player strat entry NULL.");
             c = pr2->count / *(pr2->types + i);
             for (k = 0; k < c; k++){
+                profile = StrategyProfiles_getPlayerProfile(pr2, i, j, k);
+                mu_assert(profile != NULL, "2 player psp player strat entry was NULL.");
                 pspindex = (i * pr2->count) + j * c + k;
-                mu_assert(*(*(*(pr2->player_strategy_profiles + i) + j) + k) == psps2[pspindex], "2 player psp player strat entry wrong.");
+                profile2 = *(profiles2 + *(psps2 + pspindex));
+                mu_assert(profile2 != NULL, "2 player check entry was NULL.");
+                
+                for (l = 0; l < pr2->size; l++){
+                    mu_assert(*(profile + l) == *(profile2 + l), "2 player psp player strat entry wrong.");
+                }
+                
+                free(profile);
+                
+                //mu_assert(*(*(*(pr2->player_strategy_profiles + i) + j) + k) == psps2[pspindex], "2 player psp player strat entry wrong.");
             }
         }
     }
@@ -355,23 +381,35 @@ test_strategyprofiles_create_destroy()
     for (i = 0; i < pr3->size; i++){
         mu_assert(*(pr3->types + i) == *(types3 + i), "3 player types are wrong.");
     }
-    mu_assert(pr3->profiles != NULL, "3 player profiles are NULL.");
+    
+    //mu_assert(pr3->profiles != NULL, "3 player profiles are NULL.");
     for (i = 0; i < pr3->count; i++){
-        mu_assert((pr3->profiles + i) != NULL, "3 player profile entry is NULL.");
+        profile = StrategyProfiles_getProfile(pr3, i);
+        mu_assert(profile != NULL, "3 player profile entry is NULL.");
         for (j = 0; j < pr3->size; j++){
-            mu_assert(*(*(pr3->profiles + i) + j) == *(*(profiles3 + i) + j), "3 player profile entries are wrong.");
+            mu_assert(*(profile + j) == *(*(profiles3 + i) + j), "3 player profile entries are wrong.");
         }
+        free(profile);
     }
     
-    mu_assert(pr3->player_strategy_profiles != NULL, "3 player strategy profiles are NULL.");
+    //mu_assert(pr3->player_strategy_profiles != NULL, "3 player strategy profiles are NULL.");
     for (i = 0; i < pr3->size; i++){
-        mu_assert(*(pr3->player_strategy_profiles + i) != NULL, "3 player psp player entry NULL.");
+        //mu_assert(*(pr3->player_strategy_profiles + i) != NULL, "3 player psp player entry NULL.");
         for (j = 0; j < *(pr3->types + i); j++){
-            mu_assert(*(*(pr3->player_strategy_profiles + i) + j) != NULL, "3 player psp player strat entry NULL.");
+            //mu_assert(*(*(pr3->player_strategy_profiles + i) + j) != NULL, "3 player psp player strat entry NULL.");
             c = pr3->count / *(pr3->types + i);
             for (k = 0; k < c; k++){
+                profile = StrategyProfiles_getPlayerProfile(pr3, i, j, k);
+                mu_assert(profile != NULL, "3 player psp player strat entry was NULL.");
                 pspindex = (i * pr3->count) + j * c + k;
-                mu_assert(*(*(*(pr3->player_strategy_profiles + i) + j) + k) == psps3[pspindex], "2 player psp player strat entry wrong.");
+                profile2 = *(profiles3 + psps3[pspindex]);
+                
+                for (l = 0; l < pr3->size; l++){
+                    mu_assert(*(profile + l) == *(profile2 + l), "3 player psp player strat entry wrong.");
+                }
+                
+                free(profile);
+                //mu_assert(*(*(*(pr3->player_strategy_profiles + i) + j) + k) == psps3[pspindex], "2 player psp player strat entry wrong.");
             }
         }
     }
