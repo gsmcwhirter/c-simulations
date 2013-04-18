@@ -6,56 +6,97 @@
 #include "replicator_dynamics/replicator_game.h"
 
 payoffcache_t * 
-PayoffCache_create(game_t *game, strategyprofiles_t *profiles)
+PayoffCache_create(game_t *game, strategyprofiles_t *profiles, int do_cache_info)
 {
     assert(game != NULL);
     
     int i;
     int *profile;
     
-    int free_profiles = 0;
-    if (profiles == NULL){
-        profiles = Game_StrategyProfiles_create(game);
-        free_profiles = 1;
-    }
-    
     payoffcache_t *cache = malloc(sizeof(payoffcache_t));
     assert(cache != NULL);
     
-    cache->count = profiles->count;
-    cache->payoff_cache = malloc(cache->count * sizeof(double *));
-    assert(cache->payoff_cache != NULL);
-    
-    for (i = 0; i < profiles->count; i++){ 
-        assert(*(cache->payoff_cache + i) != NULL);
-        
-        profile = StrategyProfiles_getProfile(profiles, i);
-        //*(cache->payoff_cache + i) = game->payoffs(profiles->size, *(profiles->profiles + i));
-        *(cache->payoff_cache + i) = game->payoffs(profiles->size, profile);
-        free(profile); 
+    cache->free_profiles = 0;
+    if (profiles == NULL){
+        cache->profiles = Game_StrategyProfiles_create(game, do_cache_info);
+        cache->free_profiles = 1;
+    }
+    else {
+        cache->profiles = profiles;
     }
     
-    if (free_profiles){
-        StrategyProfiles_destroy(profiles);
+    cache->count = (cache->profiles)->count;
+    cache->has_cached_info = 0;
+    if (do_cache_info > 0){
+        cache->has_cached_info = 1;
+    }
+    cache->payoffs = game->payoffs;
+    
+    if (cache->has_cached_info == 1){
+        cache->payoff_cache = malloc(cache->count * sizeof(double *));
+        assert(cache->payoff_cache != NULL);
+        
+        for (i = 0; i < (cache->profiles)->count; i++){ 
+            assert(*(cache->payoff_cache + i) != NULL);
+            
+            profile = StrategyProfiles_getProfile(cache->profiles, i);
+            //*(cache->payoff_cache + i) = game->payoffs(profiles->size, *(profiles->profiles + i));
+            *(cache->payoff_cache + i) = game->payoffs((cache->profiles)->size, profile);
+            free(profile); 
+        }
+    }
+    else {
+        cache->payoff_cache = NULL;
     }
     
     return cache;
+}
+
+double *
+PayoffCache_getPayoffs(payoffcache_t *cache, int profile_index)
+{
+    assert(cache != NULL);
+    double *payoffs;
+    int *profile;
+    int i;
+    
+    if (cache->has_cached_info){
+        payoffs = malloc((cache->profiles)->size * sizeof(double));
+        for (i = 0; i < (cache->profiles)->size; i++){
+            *(payoffs + i) = *((*(cache->payoff_cache + profile_index)) + i);
+        }
+    }
+    else {
+        profile = StrategyProfiles_getProfile(cache->profiles, profile_index);
+        payoffs = cache->payoffs((cache->profiles)->size, profile);
+        free(profile);
+    }
+    
+    return payoffs;
 }
 
 void
 PayoffCache_destroy(payoffcache_t *cache){
     int i;
     if (cache != NULL){
-        for (i = 0; i < cache->count; i++){
-            free(*(cache->payoff_cache + i));
+        if (cache->has_cached_info){
+            for (i = 0; i < cache->count; i++){
+                free(*(cache->payoff_cache + i));
+            }
+            
+            free(cache->payoff_cache);
         }
-        free(cache->payoff_cache);
+        
+        if (cache->free_profiles == 1){
+            StrategyProfiles_destroy(cache->profiles);
+        }
+        
         free(cache);
     }
 }
 
 popcollection_t *
-replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, double effective_zero, int max_generations, cb_func on_generation)
+replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, double effective_zero, int max_generations, int use_caching, cb_func on_generation)
 {
     int free_start = 0;
     assert(game != NULL);
@@ -71,9 +112,9 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
     popcollection_t * curr_pops = PopCollection_clone(start_pops);
     popcollection_t * next_pops = PopCollection_clone(start_pops);
     popcollection_t * end_pops = PopCollection_clone(start_pops);
-    strategyprofiles_t *profiles = Game_StrategyProfiles_create(game);
+    strategyprofiles_t *profiles = Game_StrategyProfiles_create(game, use_caching);
     
-    payoffcache_t *payoff_cache = PayoffCache_create(game, profiles);
+    payoffcache_t *payoff_cache = PayoffCache_create(game, profiles, use_caching);
     assert(payoff_cache != NULL);
     
     int i;
@@ -133,7 +174,8 @@ earned_payoff(int player, int strategy, popcollection_t *pops, strategyprofiles_
         profile_number = StrategyProfiles_getPlayerProfileNumber(profiles, player, strategy, profile_index); 
         //profile = *(profiles->profiles + profile_number);
         profile = StrategyProfiles_getProfile(profiles, profile_number);
-        profile_payoffs = *(payoff_cache->payoff_cache + profile_number);
+        //profile_payoffs = *(payoff_cache->payoff_cache + profile_number);
+        profile_payoffs = PayoffCache_getPayoffs(payoff_cache, profile_number);
         
         for (pl_i = 0; pl_i < profiles->size; pl_i++){
             if (pl_i != player){
@@ -148,6 +190,7 @@ earned_payoff(int player, int strategy, popcollection_t *pops, strategyprofiles_
         
         payoff = payoff +  (*(profile_payoffs + player)) * profile_prob;
         free(profile);
+        free(profile_payoffs);
     }
     
     return payoff;

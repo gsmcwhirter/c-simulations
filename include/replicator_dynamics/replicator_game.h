@@ -9,13 +9,14 @@ struct StrategyProfiles {
     int count;
     int size;
     int *types;
-    //int **profiles;
-    //int ***player_strategy_profiles;
+    int has_cached_info;
+    int **profiles;
+    int ***player_strategy_profiles;
 };
 
 typedef struct StrategyProfiles strategyprofiles_t;
 
-strategyprofiles_t * StrategyProfiles_create(int players, int *types);
+strategyprofiles_t * StrategyProfiles_create(int players, int *types, int do_cache_info);
 int * StrategyProfiles_getProfile(strategyprofiles_t *sprofs, int num);
 int * StrategyProfiles_getPlayerProfile(strategyprofiles_t *sprofs, int player, int strategy, int num);
 int StrategyProfiles_getPlayerProfileNumber(strategyprofiles_t *sprofs, int player, int strategy, int num);
@@ -32,7 +33,7 @@ typedef struct Game game_t;
 
 game_t * Game_create(int players, int populations, int *types, payoff_function payoffs);
 void Game_destroy(game_t *game);
-strategyprofiles_t * Game_StrategyProfiles_create(game_t *game);
+strategyprofiles_t * Game_StrategyProfiles_create(game_t *game, int do_cache_info);
 
 struct PopCollection * Game_PopCollection_create(game_t *game);
 
