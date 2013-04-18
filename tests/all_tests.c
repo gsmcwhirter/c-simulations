@@ -293,13 +293,13 @@ test_strategyprofiles_create_destroy_cache()
     
     int *profile, *profile2;
     
-    pr1 = StrategyProfiles_create(1, types1, 1);
+    pr1 = StrategyProfiles_create(1, types1, CACHE_PROFILES);
     mu_assert(pr1 != NULL, "SP_create returned NULL for 1 player.");
     mu_assert(pr1->size == 1, "1 player size is wrong.");
     mu_assert(pr1->count == 2, "1 player count is wrong.");
     mu_assert(pr1->types != NULL, "1 player types are NULL.");
     mu_assert(*(pr1->types) == 2, "1 player types are wrong.");
-    //mu_assert(pr1->profiles != NULL, "1 player profiles are NULL.");
+    mu_assert(pr1->profiles != NULL, "1 player profiles are NULL.");
     for (i = 0; i < pr1->count; i++){
         profile = StrategyProfiles_getProfile(pr1, i);
         mu_assert(profile != NULL, "1 player profile entry is NULL.");
@@ -308,11 +308,11 @@ test_strategyprofiles_create_destroy_cache()
         }
         free(profile);
     }
-    //mu_assert(pr1->player_strategy_profiles != NULL, "1 player strategy profiles are NULL.");
+    mu_assert(pr1->player_strategy_profiles != NULL, "1 player strategy profiles are NULL.");
     for (i = 0; i < pr1->size; i++){
-        //mu_assert(*(pr1->player_strategy_profiles + i) != NULL, "1 player psp player entry NULL.");
+        mu_assert(*(pr1->player_strategy_profiles + i) != NULL, "1 player psp player entry NULL.");
         for (j = 0; j < *(pr1->types + i); j++){
-            //mu_assert(*(*(pr1->player_strategy_profiles + i) + j) != NULL, "1 player psp player strat entry NULL.");
+            mu_assert(*(*(pr1->player_strategy_profiles + i) + j) != NULL, "1 player psp player strat entry NULL.");
             c = pr1->count / *(pr1->types + i);
             for (k = 0; k < c; k++){
                 profile = StrategyProfiles_getPlayerProfile(pr1, i, j, k);
@@ -325,13 +325,13 @@ test_strategyprofiles_create_destroy_cache()
                 }
                 
                 free(profile);
-                //mu_assert(*(*(*(pr1->player_strategy_profiles + i) + j) + k) == psps1[pspindex], "1 player psp player strat entry wrong.");
+                mu_assert(*(*(*(pr1->player_strategy_profiles + i) + j) + k) == psps1[pspindex], "1 player psp player strat entry wrong.");
             }
         }
     }
     
     
-    pr2 = StrategyProfiles_create(2, types2, 1);
+    pr2 = StrategyProfiles_create(2, types2, CACHE_PROFILES);
     mu_assert(pr2 != NULL, "SP_create returned NULL for 2 players.");
     mu_assert(pr2->size == 2, "2 player size is wrong.");
     mu_assert(pr2->count == 6, "2 player count is wrong.");
@@ -339,7 +339,7 @@ test_strategyprofiles_create_destroy_cache()
     for (i = 0; i < pr2->size; i++){
         mu_assert(*(pr2->types + i) == *(types2 + i), "2 player types are wrong.");
     }
-    //mu_assert(pr2->profiles != NULL, "2 player profiles are NULL.");
+    mu_assert(pr2->profiles != NULL, "2 player profiles are NULL.");
     for (i = 0; i < pr2->count; i++){
         profile = StrategyProfiles_getProfile(pr2, i);
         mu_assert(profile != NULL, "2 player profile entry is NULL.");
@@ -349,11 +349,11 @@ test_strategyprofiles_create_destroy_cache()
         free(profile);
     }
     
-    //mu_assert(pr2->player_strategy_profiles != NULL, "2 player strategy profiles are NULL.");
+    mu_assert(pr2->player_strategy_profiles != NULL, "2 player strategy profiles are NULL.");
     for (i = 0; i < pr2->size; i++){
-        //mu_assert(*(pr2->player_strategy_profiles + i) != NULL, "2 player psp player entry NULL.");
+        mu_assert(*(pr2->player_strategy_profiles + i) != NULL, "2 player psp player entry NULL.");
         for (j = 0; j < *(pr2->types + i); j++){
-            //mu_assert(*(*(pr2->player_strategy_profiles + i) + j) != NULL, "2 player psp player strat entry NULL.");
+            mu_assert(*(*(pr2->player_strategy_profiles + i) + j) != NULL, "2 player psp player strat entry NULL.");
             c = pr2->count / *(pr2->types + i);
             for (k = 0; k < c; k++){
                 profile = StrategyProfiles_getPlayerProfile(pr2, i, j, k);
@@ -368,12 +368,12 @@ test_strategyprofiles_create_destroy_cache()
                 
                 free(profile);
                 
-                //mu_assert(*(*(*(pr2->player_strategy_profiles + i) + j) + k) == psps2[pspindex], "2 player psp player strat entry wrong.");
+                mu_assert(*(*(*(pr2->player_strategy_profiles + i) + j) + k) == psps2[pspindex], "2 player psp player strat entry wrong.");
             }
         }
     }
     
-    pr3 = StrategyProfiles_create(3, types3, 1);
+    pr3 = StrategyProfiles_create(3, types3, CACHE_PROFILES);
     mu_assert(pr3 != NULL, "SP_create returned NULL for 3 players.");
     mu_assert(pr3->size == 3, "3 player size is wrong.");
     mu_assert(pr3->count == 8, "3 player count is wrong.");
@@ -382,7 +382,7 @@ test_strategyprofiles_create_destroy_cache()
         mu_assert(*(pr3->types + i) == *(types3 + i), "3 player types are wrong.");
     }
     
-    //mu_assert(pr3->profiles != NULL, "3 player profiles are NULL.");
+    mu_assert(pr3->profiles != NULL, "3 player profiles are NULL.");
     for (i = 0; i < pr3->count; i++){
         profile = StrategyProfiles_getProfile(pr3, i);
         mu_assert(profile != NULL, "3 player profile entry is NULL.");
@@ -392,11 +392,11 @@ test_strategyprofiles_create_destroy_cache()
         free(profile);
     }
     
-    //mu_assert(pr3->player_strategy_profiles != NULL, "3 player strategy profiles are NULL.");
+    mu_assert(pr3->player_strategy_profiles != NULL, "3 player strategy profiles are NULL.");
     for (i = 0; i < pr3->size; i++){
-        //mu_assert(*(pr3->player_strategy_profiles + i) != NULL, "3 player psp player entry NULL.");
+        mu_assert(*(pr3->player_strategy_profiles + i) != NULL, "3 player psp player entry NULL.");
         for (j = 0; j < *(pr3->types + i); j++){
-            //mu_assert(*(*(pr3->player_strategy_profiles + i) + j) != NULL, "3 player psp player strat entry NULL.");
+            mu_assert(*(*(pr3->player_strategy_profiles + i) + j) != NULL, "3 player psp player strat entry NULL.");
             c = pr3->count / *(pr3->types + i);
             for (k = 0; k < c; k++){
                 profile = StrategyProfiles_getPlayerProfile(pr3, i, j, k);
@@ -409,7 +409,7 @@ test_strategyprofiles_create_destroy_cache()
                 }
                 
                 free(profile);
-                //mu_assert(*(*(*(pr3->player_strategy_profiles + i) + j) + k) == psps3[pspindex], "2 player psp player strat entry wrong.");
+                mu_assert(*(*(*(pr3->player_strategy_profiles + i) + j) + k) == psps3[pspindex], "2 player psp player strat entry wrong.");
             }
         }
     }
@@ -470,7 +470,7 @@ test_strategyprofiles_create_destroy_nocache()
     
     int *profile, *profile2;
     
-    pr1 = StrategyProfiles_create(1, types1, 0);
+    pr1 = StrategyProfiles_create(1, types1, CACHE_NONE);
     mu_assert(pr1 != NULL, "SP_create returned NULL for 1 player.");
     mu_assert(pr1->size == 1, "1 player size is wrong.");
     mu_assert(pr1->count == 2, "1 player count is wrong.");
@@ -508,7 +508,7 @@ test_strategyprofiles_create_destroy_nocache()
     }
     
     
-    pr2 = StrategyProfiles_create(2, types2, 0);
+    pr2 = StrategyProfiles_create(2, types2, CACHE_NONE);
     mu_assert(pr2 != NULL, "SP_create returned NULL for 2 players.");
     mu_assert(pr2->size == 2, "2 player size is wrong.");
     mu_assert(pr2->count == 6, "2 player count is wrong.");
@@ -521,6 +521,10 @@ test_strategyprofiles_create_destroy_nocache()
         profile = StrategyProfiles_getProfile(pr2, i);
         mu_assert(profile != NULL, "2 player profile entry is NULL.");
         for (j = 0; j < pr2->size; j++){
+            /*
+            printf("j should be: %i\n", *(*(profiles2 + i) + j));
+            printf("j was: %i\n", *(profile + j));
+            */
             mu_assert(*(profile + j) == *(*(profiles2 + i) + j), "2 player profile entries are wrong.");
         }
         free(profile);
@@ -550,7 +554,7 @@ test_strategyprofiles_create_destroy_nocache()
         }
     }
     
-    pr3 = StrategyProfiles_create(3, types3, 0);
+    pr3 = StrategyProfiles_create(3, types3, CACHE_NONE);
     mu_assert(pr3 != NULL, "SP_create returned NULL for 3 players.");
     mu_assert(pr3->size == 3, "3 player size is wrong.");
     mu_assert(pr3->count == 8, "3 player count is wrong.");
@@ -687,7 +691,7 @@ test_game_strategyprofiles_cache()
     int types[] = {2, 3, 4};
     int i;
     game_t * game = Game_create(3, 3, types, dummy_payoffs);
-    strategyprofiles_t * sprofs = Game_StrategyProfiles_create(game, 1);
+    strategyprofiles_t * sprofs = Game_StrategyProfiles_create(game, CACHE_PROFILES);
     mu_assert(sprofs != NULL, "GSPC returned NULL.");
     mu_assert(sprofs->count == 24, "sprofs count was wrong.");
     mu_assert(sprofs->size == 3, "sprofs size was wrong.");
@@ -707,7 +711,7 @@ test_game_strategyprofiles_nocache()
     int types[] = {2, 3, 4};
     int i;
     game_t * game = Game_create(3, 3, types, dummy_payoffs);
-    strategyprofiles_t * sprofs = Game_StrategyProfiles_create(game, 0);
+    strategyprofiles_t * sprofs = Game_StrategyProfiles_create(game, CACHE_NONE);
     mu_assert(sprofs != NULL, "GSPC returned NULL.");
     mu_assert(sprofs->count == 24, "sprofs count was wrong.");
     mu_assert(sprofs->size == 3, "sprofs size was wrong.");
@@ -782,11 +786,11 @@ test_payoffcache_create_destroy_cache()
         {1, 1}
     };
     game_t *game = Game_create(2, 2, types, pd_payoffs);
-    strategyprofiles_t * sprofs = Game_StrategyProfiles_create(game, 1);
+    strategyprofiles_t * sprofs = Game_StrategyProfiles_create(game, CACHE_PROFILES);
     
     payoffcache_t *caches[2];
-    caches[0] = PayoffCache_create(game, NULL, 1);
-    caches[1] = PayoffCache_create(game, sprofs, 1);
+    caches[0] = PayoffCache_create(game, NULL, CACHE_PAYOFFS);
+    caches[1] = PayoffCache_create(game, sprofs, CACHE_ALL);
     
     for (i = 0; i < 2; i++){
         mu_assert((caches[i])->count == 4, "Cache size is wrong.");
@@ -819,11 +823,11 @@ test_payoffcache_create_destroy_nocache()
     };
     double *payoffs;
     game_t *game = Game_create(2, 2, types, pd_payoffs);
-    strategyprofiles_t * sprofs = Game_StrategyProfiles_create(game, 0);
+    strategyprofiles_t * sprofs = Game_StrategyProfiles_create(game, CACHE_NONE);
     
     payoffcache_t *caches[2];
-    caches[0] = PayoffCache_create(game, NULL, 0);
-    caches[1] = PayoffCache_create(game, sprofs, 0);
+    caches[0] = PayoffCache_create(game, NULL, CACHE_NONE);
+    caches[1] = PayoffCache_create(game, sprofs, CACHE_PROFILES);
     
     for (i = 0; i < 2; i++){
         mu_assert((caches[i])->count == 4, "Cache size is wrong.");
@@ -851,8 +855,8 @@ test_earned_payoff_1pop()
 {
     int types[] = {2, 2};
     game_t *game = Game_create(2, 1, types, pd_payoffs);
-    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, 0);
-    payoffcache_t *cache = PayoffCache_create(game, profiles, 0);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, CACHE_NONE);
+    payoffcache_t *cache = PayoffCache_create(game, profiles, CACHE_NONE);
     popcollection_t *popc = Game_PopCollection_create(game);
     
     *((*(popc->populations))->proportions + 0) = 1;
@@ -885,8 +889,8 @@ test_earned_payoff_2pop()
     int i;
     int types[] = {2, 2};
     game_t *game = Game_create(2, 2, types, pd_payoffs);
-    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, 1);
-    payoffcache_t *cache = PayoffCache_create(game, profiles, 1);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, CACHE_PROFILES);
+    payoffcache_t *cache = PayoffCache_create(game, profiles, CACHE_ALL);
     popcollection_t *popc = Game_PopCollection_create(game);
     
     for (i = 0; i < 2; i++){
@@ -923,8 +927,8 @@ test_average_earned_payoff_1pop()
 {
     int types[] = {2, 2};
     game_t *game = Game_create(2, 1, types, pd_payoffs);
-    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, 0);
-    payoffcache_t *cache = PayoffCache_create(game, profiles, 0);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, CACHE_NONE);
+    payoffcache_t *cache = PayoffCache_create(game, profiles, CACHE_NONE);
     popcollection_t *popc = Game_PopCollection_create(game);
     
     *((*(popc->populations))->proportions + 0) = 1;
@@ -950,8 +954,8 @@ test_average_earned_payoff_2pop()
 {
     int types[] = {2, 2};
     game_t *game = Game_create(2, 2, types, pd_payoffs);
-    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, 1);
-    payoffcache_t *cache = PayoffCache_create(game, profiles, 1);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, CACHE_PROFILES);
+    payoffcache_t *cache = PayoffCache_create(game, profiles, CACHE_PAYOFFS);
     popcollection_t *popc = Game_PopCollection_create(game);
     
     *((*(popc->populations))->proportions + 0) = 1;
@@ -985,8 +989,8 @@ test_update_population_proportions_1pop()
 {
     int types[] = {2, 2};
     game_t *game = Game_create(2, 1, types, pd_payoffs);
-    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, 1);
-    payoffcache_t *cache = PayoffCache_create(game, profiles, 1);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, CACHE_PROFILES);
+    payoffcache_t *cache = PayoffCache_create(game, profiles, CACHE_ALL);
     popcollection_t *popc = Game_PopCollection_create(game);
     popcollection_t *popc2 = PopCollection_clone(popc);
     
@@ -1028,8 +1032,8 @@ test_update_population_proportions_2pop()
     int i;
     int types[] = {2, 2};
     game_t *game = Game_create(2, 2, types, pd_payoffs);
-    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, 0);
-    payoffcache_t *cache = PayoffCache_create(game, profiles, 0);
+    strategyprofiles_t * profiles = Game_StrategyProfiles_create(game, CACHE_NONE);
+    payoffcache_t *cache = PayoffCache_create(game, profiles, CACHE_NONE);
     popcollection_t *popc = Game_PopCollection_create(game);
     popcollection_t *popc2 = PopCollection_clone(popc);
     
@@ -1091,7 +1095,7 @@ test_replicator_dynamics_1pop()
     popcollection_t *popc = Game_PopCollection_create(game);
     PopCollection_randomize(popc);
     
-    popcollection_t *endpop1 = replicator_dynamics(game, popc, 0, effective_zero, 0, 0, NULL);
+    popcollection_t *endpop1 = replicator_dynamics(game, popc, 0, effective_zero, 0, CACHE_NONE, NULL);
     mu_assert(endpop1 != NULL, "RD 1 returned null.");
     mu_assert(fabs(0 - *((*(endpop1->populations))->proportions)) < effective_zero, "RD 1 returned wrong population 0.");
     mu_assert(fabs(1 - *((*(endpop1->populations))->proportions + 1)) < effective_zero, "RD 1 returned wrong population 1.");
@@ -1099,13 +1103,13 @@ test_replicator_dynamics_1pop()
     gencounter = 0;
     *((*(popc->populations))->proportions) = 0.5;
     *((*(popc->populations))->proportions + 1) = 0.5;
-    popcollection_t *endpop2 = replicator_dynamics(game, popc, 0, effective_zero, 1, 0, count_generations);
+    popcollection_t *endpop2 = replicator_dynamics(game, popc, 0, effective_zero, 1, CACHE_NONE, count_generations);
     mu_assert(endpop2 != NULL, "RD 2 returned NULL.");
     mu_assert(gencounter == 1, "RD 2 took too many generations.");
     mu_assert(fabs(*((*(endpop2->populations))->proportions) - 0.375) < effective_zero, "RD 2 returned wrong population 0.");
     mu_assert(fabs(*((*(endpop2->populations))->proportions + 1) - 0.625) < effective_zero, "RD 2 returned wrong population 1.");
     
-    popcollection_t *endpop3 = replicator_dynamics(game, NULL, 0, effective_zero, 0, 1, NULL);
+    popcollection_t *endpop3 = replicator_dynamics(game, NULL, 0, effective_zero, 0, CACHE_PROFILES | CACHE_PAYOFFS, NULL);
     mu_assert(endpop3 != NULL, "RD 3 returned null.");
     mu_assert(fabs(*((*(endpop3->populations))->proportions) - 0) < effective_zero, "RD 3 returned wrong population 0.");
     mu_assert(fabs(*((*(endpop3->populations))->proportions + 1) - 1.0) < effective_zero, "RD 3 returned wrong population 1.");
@@ -1127,7 +1131,7 @@ test_replicator_dynamics_2pop()
     popcollection_t *popc = Game_PopCollection_create(game);
     PopCollection_randomize(popc);
     
-    popcollection_t *endpop1 = replicator_dynamics(game, popc, 0, effective_zero, 0, 1, NULL);
+    popcollection_t *endpop1 = replicator_dynamics(game, popc, 0, effective_zero, 0, CACHE_ALL, NULL);
     mu_assert(endpop1 != NULL, "RD 1 returned null.");
     mu_assert(fabs(0 - *((*(endpop1->populations))->proportions)) < effective_zero, "RD 1 returned wrong population 0-0.");
     mu_assert(fabs(1 - *((*(endpop1->populations))->proportions + 1)) < effective_zero, "RD 1 returned wrong population 0-1.");
@@ -1139,7 +1143,7 @@ test_replicator_dynamics_2pop()
     *((*(popc->populations))->proportions + 1) = 0.5;
     *((*(popc->populations + 1))->proportions) = 0.5;
     *((*(popc->populations + 1))->proportions + 1) = 0.5;
-    popcollection_t *endpop2 = replicator_dynamics(game, popc, 0, effective_zero, 1, 1, count_generations);
+    popcollection_t *endpop2 = replicator_dynamics(game, popc, 0, effective_zero, 1, CACHE_PAYOFFS, count_generations);
     mu_assert(endpop2 != NULL, "RD 2 returned NULL.");
     mu_assert(gencounter == 1, "RD 2 took too many generations.");
     mu_assert(fabs(*((*(endpop2->populations))->proportions) - 0.375) < effective_zero, "RD 2 returned wrong population 0-0.");
@@ -1147,7 +1151,7 @@ test_replicator_dynamics_2pop()
     mu_assert(fabs(*((*(endpop2->populations + 1))->proportions) - 0.375) < effective_zero, "RD 2 returned wrong population 1-0.");
     mu_assert(fabs(*((*(endpop2->populations + 1))->proportions + 1) - 0.625) < effective_zero, "RD 2 returned wrong population 1-1.");
     
-    popcollection_t *endpop3 = replicator_dynamics(game, NULL, 0, effective_zero, 0, 0, NULL);
+    popcollection_t *endpop3 = replicator_dynamics(game, NULL, 0, effective_zero, 0, CACHE_PROFILES, NULL);
     mu_assert(endpop3 != NULL, "RD 3 returned null.");
     mu_assert(fabs(*((*(endpop3->populations))->proportions) - 0) < effective_zero, "RD 3 returned wrong population 0-0.");
     mu_assert(fabs(*((*(endpop3->populations))->proportions + 1) - 1.0) < effective_zero, "RD 3 returned wrong population 0-1.");
