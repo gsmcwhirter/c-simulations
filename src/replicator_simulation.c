@@ -20,8 +20,8 @@
 #define AUTO_THREAD 0
 #endif
 
-int num_procs;
-int max_threads;
+extern int simulation_num_procs = 1;
+extern int simulation_max_threads = 1;
 
 popcollection_t *
 replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, double effective_zero, int max_generations, cache_mask caching, cb_func on_generation)
@@ -31,15 +31,15 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
     
     if (OMP){
         if (AUTO_THREAD){
-            num_procs = omp_get_num_procs();
-            max_threads = num_procs - 1;
+            simulation_num_procs = omp_get_num_procs();
+            simulation_max_threads = simulation_num_procs - 1;
         }
         else {
-            max_threads = omp_get_max_threads();
+            simulation_max_threads = omp_get_max_threads();
         }
     }
     else {
-        max_threads = 1;
+        simulation_max_threads = 1;
     }
     
     if (start_pops == NULL){
@@ -72,13 +72,13 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
     
     #ifdef _OPENMP
     int threads = next_pops->size;
-    if (threads > max_threads){
-        threads = max_threads;
+    if (threads > simulation_max_threads){
+        threads = simulation_max_threads;
     }
     
     int *subthreads = malloc(next_pops->size * sizeof(int));
     if (next_pops->size > 1){
-        int available_threads = max_threads - threads;
+        int available_threads = simulation_max_threads - threads;
         float weight = 0;
         for (i = 0; i < next_pops->size; i++){
             weight += (float)((*(next_pops->populations + i))->size);
@@ -95,7 +95,7 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
         PopCollection_copy(curr_pops, next_pops);
         
         if (next_pops->size == 1){
-            update_population_proportions(alpha, 0, *(next_pops->populations), curr_pops, profiles, payoff_cache, &max_threads);
+            update_population_proportions(alpha, 0, *(next_pops->populations), curr_pops, profiles, payoff_cache, &simulation_max_threads);
         }
         else {
             #ifdef _OPENMP
