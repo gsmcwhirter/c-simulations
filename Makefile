@@ -25,7 +25,7 @@ $(TARGET): build $(OBJECTS)
 	ranlib $@
 
 $(SO_TARGET): $(TARGET) $(OBJECTS)
-	$(CC) -shared $(OBJECTS) -lm -o $@
+	$(CC) -shared $(OBJECTS) -lm -lgomp -o $@
 
 build:
 	@mkdir -p build
