@@ -29,6 +29,7 @@ void
 replicator_dynamics_setup()
 {
     if (OMP){
+        omp_set_nested(1);
         simulation_num_procs = omp_get_num_procs();
         if (AUTO_THREAD){
             printf("Auto thread calc.\n");
@@ -250,6 +251,7 @@ update_population_proportions(double alpha, int player, population_t *pop, popco
     int strategy;
     int c = pop->size;
     #ifdef _OPENMP
+    int thr;
     //printf("OMP\n");
     //printf("Subthreads ptr: %p\n", threads);
     
@@ -259,13 +261,15 @@ update_population_proportions(double alpha, int player, population_t *pop, popco
     
     if (threads != NULL && (*threads) > 0){
         printf("Setting omp_set_num_threads to %i\n", *threads);
-        omp_set_num_threads(*threads);
+        //omp_set_num_threads(*threads);
+        thr = *threads;
     }
     else {
-        omp_set_num_threads(1);
+        thr = 1;
+        //omp_set_num_threads(1);
     }
     
-    #pragma omp parallel
+    #pragma omp parallel num_threads(thr)
     {
         printf("Using %i threads...\n", omp_get_num_threads());
         #pragma omp for
