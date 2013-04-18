@@ -23,12 +23,11 @@
 extern int simulation_num_procs = 1;
 extern int simulation_max_threads = 1;
 
-popcollection_t *
-replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, double effective_zero, int max_generations, cache_mask caching, cb_func on_generation)
-{   
-    int free_start = 0;
-    assert(game != NULL);
-    
+int setup_done = 0;
+
+void 
+replicator_dynamics_setup()
+{
     if (OMP){
         if (AUTO_THREAD){
             simulation_num_procs = omp_get_num_procs();
@@ -40,6 +39,19 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
     }
     else {
         simulation_max_threads = 1;
+    }
+    
+    setup_done = 1;
+}
+
+popcollection_t *
+replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, double effective_zero, int max_generations, cache_mask caching, cb_func on_generation)
+{   
+    int free_start = 0;
+    assert(game != NULL);
+    
+    if (!setup_done){
+        replicator_dynamics_setup();
     }
     
     if (start_pops == NULL){
