@@ -253,7 +253,6 @@ update_population_proportions(double alpha, int player, population_t *pop, popco
     int strategy;
     int c = pop->size;
     #ifdef _OPENMP
-    int thr;
     //printf("OMP\n");
     //printf("Subthreads ptr: %p\n", threads);
     
