@@ -1,5 +1,5 @@
 CFLAGS=-g -fopenmp -O2 -Wall -Wextra -Iinclude -rdynamic -DNDEBUG $(OPTFLAGS)
-LFLAGS=-ldl -lm $(OPTLIBS)
+LFLAGS=-ldl -lm -lgomp $(OPTLIBS)
 PREFIX?=/usr/local
 
 SOURCES=$(wildcard src/**/*.c src/*.c)
