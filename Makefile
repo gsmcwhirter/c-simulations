@@ -1,47 +1,60 @@
 CFLAGS=-g -fopenmp -O2 -Wall -Wextra -Iinclude -rdynamic -DNDEBUG $(OPTFLAGS)
-LFLAGS=-ldl -lm -lgomp $(OPTLIBS)
+LFLAGS=-lm -lgomp $(OPTLIBS)
 PREFIX?=/usr/local
 
-SOURCES=$(wildcard src/**/*.c src/*.c)
-OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
+SOURCES1=$(wildcard src/replicator/**/*.c src/replicator/*.c src/*.c)
+OBJECTS1=$(patsubst %.c,%.o,$(SOURCES1))
+SOURCES2=$(wildcard src/urnlearning/**/*.c src/urnlearning/*.c src/*.c)
+OBJECTS2=$(patsubst %.c,%.o,$(SOURCES2))
 HEADERS=$(wildcard include/**/*.h include/*.h)
 
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,$(TEST_SRC))
 
-TARGET=build/libreplicator_simulations.a
-SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
-DIST_NAME?=replicator_simulations
+TARGET1=build/libreplicator.a
+SO_TARGET1=$(patsubst %.a,%.so,$(TARGET1))
+TARGET2=build/liburnlearning.a
+SO_TARGET2=$(patsubst %.a,%.so,$(TARGET2))
+DIST_NAME?=c-simulations
 
 # The Target Build
-all: $(TARGET) $(SO_TARGET)
+all: $(TARGET1) $(SO_TARGET1) $(TARGET2) $(SO_TARGET2) 
 
-dev: CFLAGS=-g -Wall -Wextra -Iinclude -rdynamic $(OPTFLAGS)
+dev: CFLAGS=-g -fopenmp -Wall -Wextra -Iinclude -rdynamic $(OPTFLAGS)
 dev: all
 
-$(TARGET): CFLAGS += -fPIC
-$(TARGET): build $(OBJECTS)
-	ar rcs $@ $(OBJECTS)
+$(TARGET1) $(TARGET2): CFLAGS += -fPIC
+
+$(TARGET1): build $(OBJECTS1)
+	ar rcs $@ $(OBJECTS1)
 	ranlib $@
 
-$(SO_TARGET): $(TARGET) $(OBJECTS)
-	$(CC) -shared $(OBJECTS) -lm -lgomp -o $@
+$(SO_TARGET1): $(TARGET1) $(OBJECTS1)
+	$(CC) -shared $(OBJECTS1) $(LFLAGS) -o $@
+	
+$(TARGET2): build $(OBJECTS2)
+	ar rcs $@ $(OBJECTS2)
+	ranlib $@
+
+$(SO_TARGET2): $(TARGET2) $(OBJECTS2)
+	$(CC) -shared $(OBJECTS2) $(LFLAGS) -o $@
 
 build:
 	@mkdir -p build
 
+$(TESTS): LFLAGS += -ldl
 $(TESTS):
 	$(CC) $(CFLAGS) $@.c $(LFLAGS) -o $@ 
 
 # The Unit Tests
 .PHONY: tests
-test: LFLAGS += -Lbuild -lreplicator_simulations
+test: LFLAGS += -Lbuild -lreplicator -lurnlearning
 test: $(TESTS)
 	sh ./tests/runtests.sh
 	
 # The Cleaner
 clean:
-	rm -rf build dist $(OBJECTS) $(TESTS) dist/$(DIST_NAME).tar.gz
+	rm -rf build dist $(OBJECTS1) $(OBJECTS2) $(TESTS) dist/$(DIST_NAME).tar.gz
 	rm -f tests/tests.log tests/*.serial
 	find . -name "*.gc*" -exec rm {} \;
 	rm -rf `find . -name "*.dSYM" -print`
@@ -49,10 +62,12 @@ clean:
 # The Install
 install: all
 	install -d $(PREFIX)/lib/
-	install -d $(PREFIX)/include/replicator_dynamics/
-	install $(TARGET) $(PREFIX)/lib/
-	install $(SO_TARGET) $(PREFIX)/lib/
-	install $(HEADERS) $(PREFIX)/include/replicator_dynamics/
+	install -d $(PREFIX)/include/simulations/
+	install $(TARGET1) $(PREFIX)/lib/
+	install $(TARGET2) $(PREFIX)/lib/
+	install $(SO_TARGET1) $(PREFIX)/lib/
+	install $(SO_TARGET2) $(PREFIX)/lib/
+	install $(HEADERS) $(PREFIX)/include/simulations/
 
 # The Checker
 BADFUNCS='[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)'
@@ -63,7 +78,9 @@ check:
 # The Packager
 dist: all
 	@mkdir -p dist/$(DIST_NAME)
-	cp $(TARGET) dist/$(DIST_NAME)
-	cp $(SO_TARGET) dist/$(DIST_NAME)
+	cp $(TARGET1) dist/$(DIST_NAME)
+	cp $(TARGET2) dist/$(DIST_NAME)
+	cp $(SO_TARGET1) dist/$(DIST_NAME)
+	cp $(SO_TARGET2) dist/$(DIST_NAME)
 	cp -r include dist/$(DIST_NAME)
 	tar czvfC dist/$(DIST_NAME).tar.gz dist $(DIST_NAME)

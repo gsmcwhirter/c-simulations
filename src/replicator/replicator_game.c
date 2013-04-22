@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
-#include "replicator_dynamics/replicator_population.h"
-#include "replicator_dynamics/replicator_game.h"
+#include "simulations/replicator/replicator_population.h"
+#include "simulations/replicator/replicator_game.h"
     
 strategyprofiles_t *
 StrategyProfiles_create(int players, int *types, cache_mask cache){

@@ -115,7 +115,7 @@
 #include <unistd.h>
 #endif
 
-#include "replicator_dynamics/randomkit.h"
+#include "simulations/randomkit.h"
 
 #ifndef RK_DEV_URANDOM
 #define RK_DEV_URANDOM "/dev/urandom"

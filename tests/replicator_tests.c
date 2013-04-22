@@ -2,9 +2,9 @@
 #include <dlfcn.h>
 #include <math.h>
 #include <assert.h>
-#include "replicator_dynamics/replicator_population.h"
-#include "replicator_dynamics/replicator_game.h"
-#include "replicator_dynamics/replicator_simulation.h"
+#include "simulations/replicator/replicator_population.h"
+#include "simulations/replicator/replicator_game.h"
+#include "simulations/replicator/replicator_simulation.h"
 
 #define UNUSED(x) (void)(x)
 
@@ -13,7 +13,7 @@ double effective_zero = 0.00000001;
 char *
 test_shared_library()
 {
-    void *handle = dlopen("./build/libreplicator_simulations.so", RTLD_NOW);
+    void *handle = dlopen("./build/libreplicator.so", RTLD_NOW);
     char *dlerr = dlerror();
     mu_assert(dlerr == NULL, "Error opening the library to test.");
     mu_assert(handle != NULL, "Failed to open the library to test.");
