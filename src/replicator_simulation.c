@@ -1,9 +1,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
-#include "simulations/replicator/replicator_simulation.h"
-#include "simulations/replicator/replicator_population.h"
-#include "simulations/replicator/replicator_game.h"
+#include "simulations/replicator_simulation.h"
+#include "simulations/replicator_population.h"
+#include "simulations/replicator_game.h"
 
 //#include <stdio.h>
 

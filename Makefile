@@ -2,9 +2,9 @@ CFLAGS=-g -fopenmp -O2 -Wall -Wextra -Iinclude -rdynamic -DNDEBUG $(OPTFLAGS)
 LFLAGS=-lm -lgomp $(OPTLIBS)
 PREFIX?=/usr/local
 
-SOURCES1=$(wildcard src/replicator/**/*.c src/replicator/*.c src/*.c)
+SOURCES1=$(wildcard src/replicator_*.c src/distributions.c src/randomkit.c)
 OBJECTS1=$(patsubst %.c,%.o,$(SOURCES1))
-SOURCES2=$(wildcard src/urnlearning/**/*.c src/urnlearning/*.c src/*.c)
+SOURCES2=$(wildcard src/urnlearning_*.c src/distributions.c src/randomkit.c)
 OBJECTS2=$(patsubst %.c,%.o,$(SOURCES2))
 HEADERS=$(wildcard include/**/*.h include/*.h)
 

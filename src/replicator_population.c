@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "simulations/replicator/replicator_population.h"
+#include "simulations/replicator_population.h"
 #include "simulations/randomkit.h"
 #include "simulations/distributions.h"
 
