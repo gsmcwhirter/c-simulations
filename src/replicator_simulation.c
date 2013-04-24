@@ -54,6 +54,9 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
 {   
     int free_start = 0;
     assert(game != NULL);
+    if (game == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     if (!setup_done){
         replicator_dynamics_setup();
@@ -75,11 +78,17 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
     
     strategyprofiles_t *profiles = Game_StrategyProfiles_create(game, caching);
     assert(profiles != NULL);
+    if (profiles == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     //printf("profiles ok\n");
     
     payoffcache_t *payoff_cache = PayoffCache_create(game, profiles, caching);
     assert(payoff_cache != NULL);
+    if (payoff_cache == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     //printf("payoffs ok\n");
     
@@ -175,6 +184,9 @@ earned_payoff(int player, int strategy, popcollection_t *pops, strategyprofiles_
     assert(pops != NULL);
     assert(profiles != NULL);
     assert(payoff_cache != NULL);
+    if (pops == NULL || profiles == NULL || payoff_cache == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     double payoff = 0;
     int num_profiles = profiles->count / *(profiles->types + player);
@@ -218,6 +230,9 @@ average_earned_payoff(int player, popcollection_t *pops, strategyprofiles_t *pro
     assert(pops != NULL);
     assert(profiles != NULL);
     assert(payoff_cache != NULL);
+    if (pops == NULL || profiles == NULL || payoff_cache == NULL){
+        exit(EXIT_FAILURE);
+    }
 
     int strategy;
     double avg_payoff = 0;
@@ -240,6 +255,9 @@ update_population_proportions(double alpha, int player, population_t *pop, popco
     assert(curr_pops != NULL);
     assert(profiles != NULL);
     assert(payoff_cache != NULL);
+    if (pop == NULL || curr_pops == NULL || profiles == NULL || payoff_cache == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     int offset;
     

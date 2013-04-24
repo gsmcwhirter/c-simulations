@@ -3,7 +3,6 @@
 
 #include "simulations/urnlearning_urns.h"
 #include "simulations/urnlearning_game.h"
-#include "simulations/randomkit.h"
 
 typedef double ** (*payoff_function)(unsigned int players, unsigned int **types, unsigned int * state_action_profile);
 

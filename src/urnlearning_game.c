@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "simulations/urnlearning_urns.h"
 #include "simulations/urnlearning_game.h"
 #include "simulations/randomkit.h"
@@ -72,6 +73,16 @@ default_urnlearning_interaction(unsigned int players, urncollection_t **player_u
         *(state_action_profile + i) = Urn_select(*((*(player_urns + i))->urns + last_action), rand_state);
         last_action = *(state_action_profile + i); 
     }
+    
+    #ifndef NDEBUG
+    printf("Interaction:\n");
+    printf("\tState: %i\n", state);
+    printf("\tActions:");
+    for (i = 0; i < players; i++){
+        printf("  %i", *(state_action_profile + i));
+    }
+    printf("\n");
+    #endif
     
     *(state_action_profile + players) = state;
     

@@ -6,13 +6,23 @@
 strategyprofiles_t *
 StrategyProfiles_create(int players, int *types, cache_mask cache){
     assert(types != NULL);
+    if (types == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     strategyprofiles_t *sprofs = malloc(sizeof(strategyprofiles_t));
     assert(sprofs != NULL);
+    if (sprofs == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     sprofs->count = 1;
     sprofs->size = players;
     sprofs->types = malloc(players * sizeof(int));
+    assert(sprofs->types != NULL);
+    if (sprofs->types == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     int i;
     
@@ -20,14 +30,6 @@ StrategyProfiles_create(int players, int *types, cache_mask cache){
         sprofs->count = *(types + i) * sprofs->count;
         *(sprofs->types + i) = *(types + i);
         sprofs->has_cached_info = !!(cache & CACHE_PROFILES);
-        /*
-        if (do_cache_info > 0){
-            sprofs->has_cached_info = 1;
-        }
-        else {
-            sprofs->has_cached_info = 0;
-        }
-        */
     }
     
     if (sprofs->has_cached_info == 1){
@@ -35,19 +37,31 @@ StrategyProfiles_create(int players, int *types, cache_mask cache){
 
         sprofs->profiles = malloc(sprofs->count * sizeof(int*));
         assert(sprofs->profiles != NULL);
+        if (sprofs->profiles == NULL){
+            exit(EXIT_FAILURE);
+        }
         
         for (i = 0; i < sprofs->count; i++){
             *(sprofs->profiles + i) = malloc(sprofs->size * sizeof(int));
             assert(*(sprofs->profiles + i) != NULL);
+            if (*(sprofs->profiles + i) == NULL){
+                exit(EXIT_FAILURE);
+            }
         }
         
         sprofs->player_strategy_profiles = malloc(players * sizeof(int*));
         assert(sprofs->player_strategy_profiles != NULL);
+        if (sprofs->player_strategy_profiles == NULL){
+            exit(EXIT_FAILURE);
+        }
         
         num_repeats = 1;
         for (i = 0; i < sprofs->size; i++){
             *(sprofs->player_strategy_profiles + i) = malloc(*(types + i) * sizeof(int*));
             assert(*(sprofs->player_strategy_profiles + i) != NULL);
+            if (*(sprofs->player_strategy_profiles + i) == NULL){
+                exit(EXIT_FAILURE);
+            }
         
             player_types = *(sprofs->types + i);
             tmp = sprofs->count / player_types;
@@ -57,6 +71,9 @@ StrategyProfiles_create(int players, int *types, cache_mask cache){
             for (j = 0; j < player_types; j++){
                 *(*(sprofs->player_strategy_profiles + i) + j) = malloc(tmp * sizeof(int));
                 assert(*(*(sprofs->player_strategy_profiles + i) + j) != NULL);
+                if (*(*(sprofs->player_strategy_profiles + i) + j) == NULL){
+                    exit(EXIT_FAILURE);
+                }
                 
                 player_strat_count = 0;
                 
@@ -84,6 +101,10 @@ int *
 StrategyProfiles_getProfile(strategyprofiles_t *sprofs, int num)
 {
     assert(sprofs != NULL);
+    if (sprofs == NULL){
+        exit(EXIT_FAILURE);
+    }
+    
     int *profile = malloc(sprofs->size * sizeof(int));
     int i;
     
@@ -138,6 +159,9 @@ int
 StrategyProfiles_getPlayerProfileNumber(strategyprofiles_t *sprofs, int player, int strategy, int num)
 {
     assert(sprofs != NULL);
+    if (sprofs == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     /*
     num = l * num_entries_per_repeat + m
@@ -205,16 +229,28 @@ Game_create(int players, int populations, int *types, payoff_function payoffs)
 {
     assert(players > 0);
     assert(populations > 0);
+    if (players <= 0 || populations <= 0){
+        exit(EXIT_FAILURE);
+    }
 
     game_t *game = malloc(sizeof(game_t));
     assert(game != NULL);
+    if (game == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     assert(populations == 1 || players == populations);
+    if (populations != 1 && players != populations){
+        exit(EXIT_FAILURE);
+    }
     
     game->players = players;
     game->populations = populations;
     game->types = malloc(players * sizeof(int));
     assert(game->types != NULL);
+    if (game->types == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     int i;
     
@@ -245,6 +281,9 @@ strategyprofiles_t *
 Game_StrategyProfiles_create(game_t *game, cache_mask cache)
 {
     assert(game != NULL);
+    if (game == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     strategyprofiles_t *sprofs = StrategyProfiles_create(game->players, game->types, cache);
     
@@ -255,8 +294,14 @@ popcollection_t *
 Game_PopCollection_create(game_t *game)
 {
     assert(game != NULL);
+    if (game == NULL){
+        exit(EXIT_FAILURE);
+    }
     popcollection_t *pop = PopCollection_create(game->populations, game->types);
     assert(pop != NULL);
+    if (pop == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     return pop;
 }
@@ -265,12 +310,18 @@ payoffcache_t *
 PayoffCache_create(game_t *game, strategyprofiles_t *profiles, cache_mask do_cache)
 {
     assert(game != NULL);
+    if (game == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     int i;
     int *profile;
     
     payoffcache_t *cache = malloc(sizeof(payoffcache_t));
     assert(cache != NULL);
+    if (cache == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     cache->free_profiles = 0;
     if (profiles == NULL){
@@ -283,25 +334,24 @@ PayoffCache_create(game_t *game, strategyprofiles_t *profiles, cache_mask do_cac
     
     cache->count = (cache->profiles)->count;
     cache->has_cached_info = !!(do_cache & CACHE_PAYOFFS);
-    /*
-    cache->has_cached_info = 0;
-    if (do_cache_info > 0){
-        cache->has_cached_info = 1;
-    }
-    */
     cache->payoffs = game->payoffs;
     
     if (cache->has_cached_info == 1){
         cache->payoff_cache = malloc(cache->count * sizeof(double *));
         assert(cache->payoff_cache != NULL);
+        if (cache->payoff_cache == NULL){
+            exit(EXIT_FAILURE);
+        }
         
         for (i = 0; i < (cache->profiles)->count; i++){ 
-            assert(*(cache->payoff_cache + i) != NULL);
-            
             profile = StrategyProfiles_getProfile(cache->profiles, i);
             //*(cache->payoff_cache + i) = game->payoffs(profiles->size, *(profiles->profiles + i));
             *(cache->payoff_cache + i) = game->payoffs((cache->profiles)->size, profile);
             free(profile); 
+            assert(*(cache->payoff_cache + i) != NULL);
+            if (*(cache->payoff_cache + i) == NULL){
+                exit(EXIT_FAILURE);
+            }
         }
     }
     else {
@@ -315,6 +365,9 @@ double *
 PayoffCache_getPayoffs(payoffcache_t *cache, int profile_index)
 {
     assert(cache != NULL);
+    if (cache == NULL){
+        exit(EXIT_FAILURE);
+    }
     double *payoffs;
     int *profile;
     int i;

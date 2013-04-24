@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 #include "simulations/replicator_population.h"
 #include "simulations/randomkit.h"
 #include "simulations/distributions.h"
@@ -11,10 +12,16 @@ Population_create(int size)
 {
     population_t *pop = malloc(sizeof(population_t));
     assert(pop != NULL);
+    if (pop == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     pop->size = size;
     pop->proportions = malloc(size * sizeof(double));
     assert(pop->proportions != NULL);
+    if (pop->proportions == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     return pop;
 }
@@ -35,6 +42,9 @@ Population_equal(population_t *pop1, population_t *pop2, double effective_zero)
     assert(pop1 != NULL);
     assert(pop2 != NULL);
     assert(pop1->size == pop2->size);
+    if (pop1 == NULL || pop2 == NULL || pop1->size != pop2->size){
+        exit(EXIT_FAILURE);
+    }
     
     int i;
     for (i = 0; i < pop1->size; i++){
@@ -52,6 +62,9 @@ Population_copy(population_t *target, population_t *source)
     assert(source != NULL);
     assert(target != NULL);
     assert(source->size == target->size);
+    if (source == NULL || target == NULL || source->size != target->size){
+        exit(EXIT_FAILURE);
+    }
     
     int i;
     for (i = 0; i < source->size; i++){
@@ -62,6 +75,9 @@ Population_copy(population_t *target, population_t *source)
 void
 Population_randomize(population_t *pop){
     assert(pop != NULL);
+    if (pop == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     /* Lifted from NumPy and translated from cython to C
     
@@ -135,16 +151,25 @@ void
 Population_serialize(population_t *pop, FILE *file)
 {
     assert(pop != NULL);
-    assert(file != NULL);    
+    assert(file != NULL);
+    if (pop == NULL || file == NULL){
+        exit(EXIT_FAILURE);
+    }    
     
     unsigned int written;
     written = fwrite(pop_serial_prefix, sizeof(char), 3, file);
     written += fwrite(&(pop->size), sizeof(int), 1, file);
     
     assert(written == 4);
+    if (written != 4){
+        exit(EXIT_FAILURE);
+    }
     
     written = fwrite(pop->proportions, sizeof(double), pop->size, file);
-    assert(written == pop->size);
+    assert(written == (unsigned int)pop->size);
+    if (written != (unsigned int)pop->size){
+        exit(EXIT_FAILURE);
+    }
 }
 
 population_t *
@@ -152,6 +177,9 @@ Population_deserialize(FILE *file)
 {
     //assume trying to read from the file wherever the file pointer is.
     assert(file != NULL);
+    if (file == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     char *prefix = malloc(sizeof(char) * 4);
     *(prefix + 3) = '\0';
@@ -159,22 +187,37 @@ Population_deserialize(FILE *file)
     int reads;
     
     assert(prefix != NULL);
+    if (prefix == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     reads = fread(prefix, sizeof(char), 3, file);
     assert(reads == 3);
     assert(!strcmp(prefix, pop_serial_prefix));
+    if (reads != 3 || strcmp(prefix, pop_serial_prefix)){
+        exit(EXIT_FAILURE);
+    }
     
     free(prefix);
     
     reads = fread(&size, sizeof(int), 1, file);
     assert(reads == 1);
     assert(size > 0);
+    if (reads != 1 || size <= 0){
+        exit(EXIT_FAILURE);
+    }
     
     population_t *pop = Population_create(size);
     assert(pop != NULL);
+    if (pop == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     reads = fread(pop->proportions, sizeof(double), pop->size, file);
     assert(reads == pop->size);
+    if (reads != pop->size){
+        exit(EXIT_FAILURE);
+    }
     
     return pop;
 }
@@ -184,10 +227,16 @@ PopCollection_create(int num_pops, int *sizes)
 {
     popcollection_t *coll = malloc(sizeof(popcollection_t));
     assert(coll != NULL);
+    if (coll == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     coll->size = num_pops;
     coll->pop_sizes = malloc(num_pops * sizeof(int));
     assert(coll->pop_sizes != NULL);
+    if (coll->pop_sizes == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     int i;
     for (i = 0; i < coll->size; i++){
@@ -196,6 +245,9 @@ PopCollection_create(int num_pops, int *sizes)
     
     coll->populations = malloc(coll->size * sizeof(population_t *));
     assert(coll->populations != NULL);
+    if (coll->populations == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     for (i = 0; i < coll->size; i++){
         *(coll->populations + i) = Population_create(sizes[i]);
@@ -208,6 +260,9 @@ popcollection_t *
 PopCollection_clone(popcollection_t *original)
 {
     assert(original != NULL);
+    if (original == NULL){
+        exit(EXIT_FAILURE);
+    }
     popcollection_t *clon = PopCollection_create(original->size, original->pop_sizes);
     
     return clon;
@@ -233,6 +288,9 @@ PopCollection_equal(popcollection_t *coll1, popcollection_t *coll2, double effec
     assert(coll1 != NULL);
     assert(coll2 != NULL);
     assert(coll1->size == coll2->size);
+    if (coll1 == NULL || coll2 == NULL || coll1->size != coll2->size){
+        exit(EXIT_FAILURE);
+    }
     
     int i;
     for (i = 0; i < coll1->size; i++){
@@ -250,6 +308,9 @@ PopCollection_copy(popcollection_t *target, popcollection_t *source)
     assert(source != NULL);
     assert(target != NULL);
     assert(source->size == target->size);
+    if (source == NULL || target == NULL || source->size != target->size){
+        exit(EXIT_FAILURE);
+    }
     
     int i;
     for (i = 0; i < source->size; i++){
@@ -261,6 +322,9 @@ void
 PopCollection_randomize(popcollection_t *coll)
 {
     assert(coll != NULL);
+    if (coll == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     int i;
     for (i = 0; i < coll->size; i++){
@@ -274,13 +338,19 @@ void
 PopCollection_serialize(popcollection_t *coll, FILE *file)
 {
     assert(coll != NULL);
-    assert(file != NULL);    
+    assert(file != NULL);
+    if (coll == NULL || file == NULL){
+        exit(EXIT_FAILURE);
+    }    
     
     unsigned int written;
     written = fwrite(col_serial_prefix, sizeof(char), 3, file);
     written += fwrite(&(coll->size), sizeof(int), 1, file);
     written += fwrite(coll->pop_sizes, sizeof(int), coll->size, file);
-    assert(written == (4 + coll->size));
+    assert(written == (4 + (unsigned int)coll->size));
+    if (written != (4 + (unsigned int)coll->size)){
+        exit(EXIT_FAILURE);
+    }
     
     int i;
     for (i = 0; i < coll->size; i++){
@@ -293,6 +363,9 @@ PopCollection_deserialize(FILE *file)
 {
     //assume trying to read from the file wherever the file pointer is.
     assert(file != NULL);
+    if (file == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     char *prefix = malloc(sizeof(char) * 4);
     *(prefix + 3) = '\0';
@@ -301,24 +374,40 @@ PopCollection_deserialize(FILE *file)
     int reads;
     
     assert(prefix != NULL);
+    if (prefix == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     reads = fread(prefix, sizeof(char), 3, file);
     assert(reads == 3);
     assert(!strcmp(prefix, col_serial_prefix));
+    if (reads != 3 || strcmp(prefix, col_serial_prefix)){
+        exit(EXIT_FAILURE);
+    }
     
     free(prefix);
     
     reads = fread(&size, sizeof(int), 1, file);
     assert(reads == 1);
     assert(size > 0);
+    if (reads != 1 || size <= 0){
+        exit(EXIT_FAILURE);
+    }
     
     types = malloc(sizeof(int) * size);
     assert(types != NULL);
     reads = fread(types, sizeof(int), size, file);
     assert(reads == size);
     
+    if (types == NULL || reads != size){
+        exit(EXIT_FAILURE);
+    }
+    
     popcollection_t * coll = PopCollection_create(size, types);
     assert(coll != NULL);
+    if (coll == NULL){
+        exit(EXIT_FAILURE);
+    }
     
     free(types);
     

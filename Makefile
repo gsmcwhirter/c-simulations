@@ -47,10 +47,13 @@ $(TESTS):
 	$(CC) $(CFLAGS) $@.c $(LFLAGS) -o $@ 
 
 # The Unit Tests
-.PHONY: tests
+.PHONY: test devtest
 test: LFLAGS += -Lbuild -lreplicator -lurnlearning
 test: $(TESTS)
 	sh ./tests/runtests.sh
+	
+devtest: CFLAGS=-g -fopenmp -Wall -Wextra -Iinclude -rdynamic $(OPTFLAGS)
+devtest: test
 	
 # The Cleaner
 clean:
