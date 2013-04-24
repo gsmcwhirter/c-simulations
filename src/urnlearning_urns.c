@@ -29,6 +29,7 @@ Urn_create(unsigned int types, double *initial_counts)
     
     for (i = 0; i < urn->types; i++){
         *(urn->counts + i) = 0.0;
+        *(urn->proportions + i) = 0.0;
     }
     
     if (initial_counts == NULL){
@@ -75,7 +76,7 @@ Urn_update(urn_t *urn, double *count_updates)
     double total = 0;
     for (i = 0; i < urn->types; i++){
         *(urn->counts + i) += *(count_updates + i);
-        total = *(urn->counts + i);
+        total += *(urn->counts + i);
     }
     
     if (total > 0){
@@ -96,15 +97,8 @@ Urn_update(urn_t *urn, double *count_updates)
 }
 
 unsigned int 
-Urn_select(urn_t *urn, rk_state rand_state)
+Urn_select(urn_t *urn, double random_draw)
 {
-    assert(urn != NULL);
-    if (urn == NULL){
-        exit(EXIT_FAILURE);
-    }
-    
-    double random_draw = rk_double(&rand_state);
-    
     int draw_failed = 1;
     unsigned int draw_value;
     unsigned int i;
@@ -132,6 +126,25 @@ Urn_select(urn_t *urn, rk_state rand_state)
     #endif
     
     return draw_value;
+}
+
+unsigned int
+Urn_randomSelect(urn_t *urn, rk_state *rand_state_ptr)
+{
+    assert(urn != NULL);
+    if (urn == NULL){
+        exit(EXIT_FAILURE);
+    }
+    
+    if (rand_state_ptr == NULL){
+        rk_state rand_state;
+        rk_randomseed(&rand_state);
+        rand_state_ptr = &rand_state;    
+    }
+    
+    double random_draw = rk_double(rand_state_ptr);
+    
+    return Urn_select(urn, random_draw);
 }
 
 void 

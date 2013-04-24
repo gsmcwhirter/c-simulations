@@ -3,6 +3,7 @@
 #include "simulations/urnlearning_urns.h"
 #include "simulations/urnlearning_game.h"
 #include "simulations/urnlearning_simulation.h"
+#include "simulations/randomkit.h"
 
 #define UNUSED(x) (void)(x)
 
@@ -23,6 +24,121 @@ test_shared_library()
 char *
 test_urn_create_destroy()
 {
+    double initial_counts[] = {1.0, 1.0, 2.0};
+    urn_t * urn1 = Urn_create(3, initial_counts);
+    mu_assert(urn1 != NULL, "Could not create urn 1.");
+    mu_assert(urn1->types == 3, "Urn 1 types were wrong.");
+    mu_assert(urn1->counts != NULL, "Urn 1 counts were NULL.");
+    mu_assert(*(urn1->counts + 0) == 1.0, "Urn 1 count 0 was wrong.");
+    mu_assert(*(urn1->counts + 1) == 1.0, "Urn 1 count 1 was wrong.");
+    mu_assert(*(urn1->counts + 2) == 2.0, "Urn 1 count 2 was wrong.");
+    mu_assert(urn1->proportions != NULL, "Urn 1 proportions were NULL.");
+    mu_assert(*(urn1->proportions + 0) == 0.25, "Urn 1 proportion 0 was wrong.");
+    mu_assert(*(urn1->proportions + 1) == 0.25, "Urn 1 proportion 1 was wrong.");
+    mu_assert(*(urn1->proportions + 2) == 0.50, "Urn 1 proportion 2 was wrong.");
+    
+    urn_t * urn2 = Urn_create(4, NULL);
+    mu_assert(urn2 != NULL, "Could not create urn 2.");
+    mu_assert(urn2->types == 4, "Urn 2 types were wrong.");
+    mu_assert(urn2->counts != NULL, "Urn 2 counts were NULL.");
+    mu_assert(*(urn2->counts + 0) == 0.0, "Urn 2 count 0 was wrong.");
+    mu_assert(*(urn2->counts + 1) == 0.0, "Urn 2 count 1 was wrong.");
+    mu_assert(*(urn2->counts + 2) == 0.0, "Urn 2 count 2 was wrong.");
+    mu_assert(*(urn2->counts + 3) == 0.0, "Urn 2 count 3 was wrong.");
+    mu_assert(urn2->proportions != NULL, "Urn 2 proportions were NULL.");
+    mu_assert(*(urn2->proportions + 0) == 0.0, "Urn 2 proportion 0 was wrong.");
+    mu_assert(*(urn2->proportions + 1) == 0.0, "Urn 2 proportion 1 was wrong.");
+    mu_assert(*(urn2->proportions + 2) == 0.0, "Urn 2 proportion 2 was wrong.");
+    mu_assert(*(urn2->proportions + 3) == 0.0, "Urn 2 proportion 3 was wrong.");
+    
+    Urn_destroy(urn1);
+    Urn_destroy(urn2);
+    
+    return NULL;
+}
+
+char *
+test_urn_update()
+{
+    double initial_counts[] = {1.0, 1.0, 2.0};
+    urn_t * urn1 = Urn_create(3, initial_counts);
+    
+    double updates1[] = {2.0, 2.0, 0.0};
+    Urn_update(urn1, updates1);
+    mu_assert(*(urn1->counts + 0) == 3.0, "Urn 1 count 0 was wrong.");
+    mu_assert(*(urn1->counts + 1) == 3.0, "Urn 1 count 1 was wrong.");
+    mu_assert(*(urn1->counts + 2) == 2.0, "Urn 1 count 2 was wrong.");
+    mu_assert(*(urn1->proportions + 0) == 0.375, "Urn 1 proportion 0 was wrong.");
+    mu_assert(*(urn1->proportions + 1) == 0.375, "Urn 1 proportion 1 was wrong.");
+    mu_assert(*(urn1->proportions + 2) == 0.25, "Urn 1 proportion 2 was wrong.");
+    
+    urn_t * urn2 = Urn_create(4, NULL);
+    double updates2[] = {1.0, 2.0, 3.0, 4.0};
+    Urn_update(urn2, updates2);
+    mu_assert(*(urn2->counts + 0) == 1.0, "Urn 2 count 0 was wrong.");
+    mu_assert(*(urn2->counts + 1) == 2.0, "Urn 2 count 1 was wrong.");
+    mu_assert(*(urn2->counts + 2) == 3.0, "Urn 2 count 2 was wrong.");
+    mu_assert(*(urn2->counts + 3) == 4.0, "Urn 2 count 3 was wrong.");
+    mu_assert(*(urn2->proportions + 0) == 0.1, "Urn 2 proportion 0 was wrong.");
+    mu_assert(*(urn2->proportions + 1) == 0.2, "Urn 2 proportion 1 was wrong.");
+    mu_assert(*(urn2->proportions + 2) == 0.3, "Urn 2 proportion 2 was wrong.");
+    mu_assert(*(urn2->proportions + 3) == 0.4, "Urn 2 proportion 3 was wrong.");
+    
+    Urn_destroy(urn1);
+    Urn_destroy(urn2);
+    
+    return NULL;
+}
+
+char *
+test_urn_select()
+{
+    double initial[] = {1.0, 2.0, 3.0, 4.0};
+    urn_t * urn = Urn_create(4, initial);
+    
+    unsigned int selected;
+    selected = Urn_select(urn, 0.05);
+    mu_assert(selected == 0, "Selection failed for 0.05");
+    selected = Urn_select(urn, 0.1);
+    mu_assert(selected == 0, "Selection failed for 0.1");
+    selected = Urn_select(urn, 0.25);
+    mu_assert(selected == 1, "Selection failed for 0.25");
+    selected = Urn_select(urn, 0.301);
+    mu_assert(selected == 2, "Selection failed for 0.301");
+    selected = Urn_select(urn, 0.559);
+    mu_assert(selected == 2, "Selection failed for 0.559");
+    selected = Urn_select(urn, 0.675);
+    mu_assert(selected == 3, "Selection failed for 0.675");
+    selected = Urn_select(urn, 1.0);
+    mu_assert(selected == 3, "Selection failed for 1.0");
+    selected = Urn_select(urn, 1.1);
+    mu_assert(selected == 4, "Selection failed for 1.0");
+    
+    Urn_destroy(urn);
+    
+    return NULL;
+}
+
+char *
+test_urn_randomselect()
+{
+    double initial[] = {1.0, 2.0, 3.0, 4.0};
+    urn_t * urn = Urn_create(4, initial);
+    
+    rk_state rand_state;
+    rk_randomseed(&rand_state);
+    
+    int num_draws = 5;
+    int i;
+    unsigned int selected;
+    for (i = 0; i < num_draws; i++){
+        selected = Urn_randomSelect(urn, &rand_state);
+        mu_assert(selected >= 0 && selected < 4, "Random urn selection out of bounds (rand_state).");
+        selected = Urn_randomSelect(urn, NULL);
+        mu_assert(selected >= 0 && selected < 4, "Random urn selection out of bounds (NULL).");
+    }
+    
+    Urn_destroy(urn);
     
     return NULL;
 }
@@ -30,7 +146,58 @@ test_urn_create_destroy()
 char *
 test_urncollection_create_destroy()
 {
+    unsigned int urns1 = 3;
+    unsigned int types1[] = {2, 3, 4};
+    double **initial_counts = malloc(urns1 * sizeof(double *));
+    unsigned int i, j;
+    for (i = 0; i < urns1; i++){
+        *(initial_counts + i) = malloc(*(types1 + i) * sizeof(double));
+        for (j = 0; j < *(types1 + i); j++){
+            *(*(initial_counts + i) + j) = 1.0;
+        }
+    }
     
+    urncollection_t * coll1 = UrnCollection_create(urns1, types1, initial_counts);
+    mu_assert(coll1 != NULL, "UrnCollection 1 not created.");
+    mu_assert(coll1->num_urns == urns1, "UrnCollection 1 size was wrong.");
+    mu_assert(coll1->urns != NULL, "UrnCollection 1 urns were NULL.");
+    for (i = 0; i < coll1->num_urns; i++){
+        mu_assert(*(coll1->urns + i) != NULL, "UrnCollection 1 urn was NULL.");
+        mu_assert((*(coll1->urns + i))->types == *(types1 + i), "UrnCollection 1 urn was wrong.");
+        mu_assert((*(coll1->urns + i))->counts != NULL, "UrnCollection 1 urn counts were NULL.");
+        mu_assert((*(coll1->urns + i))->proportions != NULL, "UrnCollection 1 urn proportions were NULL.");
+        
+        for (j = 0; j < (*(coll1->urns + i))->types; j++){
+            mu_assert(*((*(coll1->urns + i))->counts + j) == 1.0, "UrnCollection 1 urn counts were wrong.");
+            mu_assert(*((*(coll1->urns + i))->proportions + j) == (1.0 / (double)(*(types1 + i))), "UrnCollection 1 urn proportions were wrong.");
+        }
+    }
+    
+    unsigned int urns2 = 4;
+    unsigned int types2[] = {2, 3, 4, 5};
+    urncollection_t * coll2 = UrnCollection_create(urns2, types2, NULL);
+    mu_assert(coll2 != NULL, "UrnCollection 2 not created.");
+    mu_assert(coll2->num_urns == urns2, "UrnCollection 2 size was wrong.");
+    mu_assert(coll2->urns != NULL, "UrnCollection 2 urns were NULL.");
+    for (i = 0; i < coll2->num_urns; i++){
+        mu_assert(*(coll2->urns + i) != NULL, "UrnCollection 2 urn was NULL.");
+        mu_assert((*(coll2->urns + i))->types == *(types2 + i), "UrnCollection 2 urn was wrong.");
+        mu_assert((*(coll2->urns + i))->counts != NULL, "UrnCollection 2 urn counts were NULL.");
+        mu_assert((*(coll2->urns + i))->proportions != NULL, "UrnCollection 2 urn proportions were NULL.");
+        
+        for (j = 0; j < (*(coll2->urns + i))->types; j++){
+            mu_assert(*((*(coll2->urns + i))->counts + j) == 0.0, "UrnCollection 2 urn counts were wrong.");
+            mu_assert(*((*(coll2->urns + i))->proportions + j) == 0.0, "UrnCollection 2 urn proportions were wrong.");
+        }
+    }
+    
+    
+    for (i = 0; i < urns1; i++){
+        free(*(initial_counts + i));
+    }
+    free(initial_counts);
+    UrnCollection_destroy(coll1);
+    UrnCollection_destroy(coll2);
     return NULL;
 }
 
@@ -42,14 +209,27 @@ test_urngame_create_destroy()
 }
 
 char *
+test_urn_simulation()
+{
+    return NULL;
+}
+
+char *
 all_tests() 
 {
     mu_suite_start();
 
     mu_run_test(test_shared_library);
     mu_run_test(test_urn_create_destroy);
+    mu_run_test(test_urn_update);
+    mu_run_test(test_urn_select);
+    mu_run_test(test_urn_randomselect);
+    
     mu_run_test(test_urncollection_create_destroy);
+    
     mu_run_test(test_urngame_create_destroy);
+    
+    mu_run_test(test_urn_simulation);
 
     return NULL;
 }

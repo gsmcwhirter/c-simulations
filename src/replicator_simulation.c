@@ -96,13 +96,17 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
     
     PopCollection_copy(next_pops, start_pops);
     
+    int *subthreads;
+    int free_subthreads = 0;
+    
     #ifdef _OPENMP
     int threads = next_pops->size;
     if (threads > simulation_max_threads){
         threads = simulation_max_threads;
     }
     
-    int *subthreads = malloc(next_pops->size * sizeof(int));
+    subthreads = malloc(next_pops->size * sizeof(int));
+    free_subthreads = 1;
     int available_threads = 0;
     if (next_pops->size > 1){
         available_threads = simulation_max_threads - threads;
@@ -158,9 +162,9 @@ replicator_dynamics(game_t *game, popcollection_t *start_pops, double alpha, dou
         }
     } while((max_generations == 0 || generation < max_generations) && !PopCollection_equal(curr_pops, next_pops, effective_zero));
     
-    #ifdef _OPENMP
-    free(subthreads); 
-    #endif
+    if (free_subthreads){
+        free(subthreads);
+    }
     
     PopCollection_copy(end_pops, next_pops);
     

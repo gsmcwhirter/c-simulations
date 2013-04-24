@@ -14,7 +14,7 @@ urnlearning_dynamics(urngame_t *urngame, unsigned int max_iterations, payoff_fun
     unsigned int i;
     unsigned int tmp;
     for (iteration = 0; iteration < max_iterations; iteration++){
-        unsigned int *state_action_profile = urngame->interaction_function(urngame->num_players, urngame->player_urns, rand_state);
+        unsigned int *state_action_profile = urngame->interaction_function(urngame->num_players, urngame->player_urns, &rand_state);
         
         double **payoffs = payoff_func(urngame->num_players, urngame->types, state_action_profile);
         
