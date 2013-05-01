@@ -204,6 +204,84 @@ test_urncollection_create_destroy()
 char *
 test_urngame_create_destroy()
 {
+    unsigned int num_players = 3;
+    unsigned int urn_counts[] = {2, 3, 4};
+    unsigned int **types = malloc(num_players * sizeof(unsigned int *));
+    double ***initial_counts = malloc(num_players * sizeof(double **));
+    unsigned int i;
+    unsigned int j;
+    unsigned int k;
+    for (i = 0; i < num_players; i++){
+        *(types + i) = malloc(*(urn_counts + i) * sizeof(unsigned int));
+        *(initial_counts + i) = malloc(*(urn_counts + i) * sizeof(double *));
+        for (j = 0; j < *(urn_counts + i); j++){
+            *(*(types + i) + j) = j + 1;
+            *(*(initial_counts + i) + j) = malloc((j + 1) * sizeof(double));
+            for (k = 0; k < (j + 1); k++){
+                *(*(*(initial_counts + i) + j) + k) = 1.0;
+            }
+        }
+    }
+    
+    urngame_t * game1 = UrnGame_create(num_players, urn_counts, types, initial_counts, NULL);
+    mu_assert(game1 != NULL, "UrnGame 1 was NULL.");
+    mu_assert(game1->num_players == num_players, "UrnGame 1 players were wrong.");
+    mu_assert(game1->types != NULL, "UrnGame 1 types were NULL.");
+    mu_assert(game1->player_urns != NULL, "UrnGame 1 player_urns were NULL.");
+    mu_assert(game1->interaction_function != NULL, "UrnGame 1 interaction_function was NULL.");
+    for (i = 0; i < num_players; i++){
+        mu_assert(*(game1->types + i) != NULL, "UrnGame 1 type entries were NULL.");
+        mu_assert(*(game1->player_urns + i) != NULL, "UrnGame 1 player_urns entries were NULL.");
+        mu_assert((*(game1->player_urns + i))->num_urns == *(urn_counts + i), "UrnGame 1 types were wrong.");
+        for (j = 0; j < (*(game1->player_urns + i))->num_urns; j++){
+            mu_assert(*(*(game1->types + i) + j) == j+1, "UrnGame 1 types were wrong.");
+            mu_assert((*((*(game1->player_urns + i))->urns + j))->types == j+1, "UrnGame 1 types were wrong.");
+            for (k = 0; k < (*((*(game1->player_urns + i))->urns + j))->types; k++){
+                mu_assert(*((*((*(game1->player_urns + i))->urns + j))->counts + k) == 1.0, "UrnGame 1 counts were wrong.");
+                mu_assert(*((*((*(game1->player_urns + i))->urns + j))->proportions + k) == (1.0 / (double)((*((*(game1->player_urns + i))->urns + j))->types)), "UrnGame 1 proportions were wrong.");
+            }
+        }
+    }
+    
+    urngame_t * game2 = UrnGame_create(num_players, urn_counts, types, NULL, NULL);
+    mu_assert(game2 != NULL, "UrnGame 2 was NULL.");
+    mu_assert(game2->num_players == num_players, "UrnGame 2 players were wrong.");
+    mu_assert(game2->types != NULL, "UrnGame 2 types were NULL.");
+    mu_assert(game2->player_urns != NULL, "UrnGame 2 player_urns were NULL.");
+    mu_assert(game2->interaction_function != NULL, "UrnGame 2 interaction_function was NULL.");
+    for (i = 0; i < num_players; i++){
+        mu_assert(*(game2->types + i) != NULL, "UrnGame 2 type entries were NULL.");
+        mu_assert(*(game2->player_urns + i) != NULL, "UrnGame 2 player_urns entries were NULL.");
+        mu_assert((*(game2->player_urns + i))->num_urns == *(urn_counts + i), "UrnGame 2 types were wrong.");
+        for (j = 0; j < (*(game2->player_urns + i))->num_urns; j++){
+            mu_assert(*(*(game2->types + i) + j) == j+1, "UrnGame 2 types were wrong.");
+            mu_assert((*((*(game2->player_urns + i))->urns + j))->types == j+1, "UrnGame 2 types were wrong.");
+            for (k = 0; k < (*((*(game2->player_urns + i))->urns + j))->types; k++){
+                mu_assert(*((*((*(game2->player_urns + i))->urns + j))->counts + k) == 0.0, "UrnGame 2 counts were wrong.");
+                mu_assert(*((*((*(game2->player_urns + i))->urns + j))->proportions + k) == 0.0, "UrnGame 2 proportions were wrong.");
+            }
+        }
+    }
+    
+    
+    for (i = 0; i < num_players; i++){
+        free(*(types + i));
+        for (j = 0; j < *(urn_counts + i); j++){
+            free(*(*(initial_counts + i) + j));
+        }
+        free(*(initial_counts + i));
+    }
+    free(types);
+    free(initial_counts);
+    UrnGame_destroy(game1);
+    UrnGame_destroy(game2);
+    
+    return NULL;
+}
+
+char *
+test_default_urnlearning_interactions()
+{
     
     return NULL;
 }
@@ -228,6 +306,7 @@ all_tests()
     mu_run_test(test_urncollection_create_destroy);
     
     mu_run_test(test_urngame_create_destroy);
+    mu_run_test(test_default_urnlearning_interactions);
     
     mu_run_test(test_urn_simulation);
 

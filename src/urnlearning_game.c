@@ -62,12 +62,13 @@ UrnGame_destroy(urngame_t *urngame)
 
 unsigned int * 
 default_urnlearning_interaction(unsigned int players, urncollection_t **player_urns, rk_state *rand_state_ptr)
-{
-    unsigned int * state_action_profile = malloc((players + 1) * sizeof(unsigned int));
-    
-    unsigned int i;
+{   
     unsigned int state;
-    state = (unsigned int)rk_interval((*(player_urns + 0))->num_urns, rand_state_ptr);
+    state = (unsigned int)rk_interval((*(player_urns + 0))->num_urns - 1, rand_state_ptr); //-1 because this is inclusive
+    
+    unsigned int * state_action_profile = malloc((players + 1) * sizeof(unsigned int));
+    unsigned int i;
+    
     unsigned int last_action = state;
     for (i = 0; i < players; i++){
         *(state_action_profile + i) = Urn_randomSelect(*((*(player_urns + i))->urns + last_action), rand_state_ptr);

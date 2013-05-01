@@ -10,6 +10,16 @@ urnlearning_dynamics(urngame_t *urngame, unsigned int max_iterations, payoff_fun
     rk_state rand_state;
     rk_randomseed(&rand_state);
     
+    assert(urngame != NULL);
+    if (urngame == NULL){
+        exit(EXIT_FAILURE);
+    }
+    
+    assert(payoff_func != NULL);
+    if (payoff_func == NULL){
+        exit(EXIT_FAILURE);
+    }
+    
     unsigned int iteration;
     unsigned int i;
     unsigned int tmp;
@@ -27,5 +37,11 @@ urnlearning_dynamics(urngame_t *urngame, unsigned int max_iterations, payoff_fun
             }
             Urn_update(*((*(urngame->player_urns + i))->urns + *(state_action_profile + tmp)), *(payoffs + i));
         }
+        
+        for (i = 0; i < urngame->num_players; i++){
+            free(*(payoffs + i));
+        }
+        free(payoffs);
+        free(state_action_profile);
     }
 }
