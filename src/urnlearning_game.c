@@ -60,6 +60,43 @@ UrnGame_destroy(urngame_t *urngame)
     }
 }
 
+void
+UrnGame_copy(urngame_t *source, urngame_t *target)
+{
+    assert(source != NULL);
+    assert(target != NULL);
+    assert(source->num_players == target->num_players);
+    if (source == NULL || target == NULL || source->num_players != target->num_players){
+        exit(EXIT_FAILURE);
+    }
+    
+    unsigned int i;
+    
+    for (i = 0; i < source->num_players; i++){
+        UrnCollection_copy(*(source->player_urns + i), *(target->player_urns + i));
+    }
+}
+
+urngame_t *
+UrnGame_clone(urngame_t *urngame)
+{
+    assert(urngame != NULL);
+    if (urngame == NULL){
+        exit(EXIT_FAILURE);
+    }
+    
+    unsigned int i;
+    unsigned int * num_urns = malloc(urngame->num_players * sizeof(unsigned int));
+    for (i = 0; i < urngame->num_players; i++){
+        *(num_urns + i) = (*(urngame->player_urns + i))->num_urns;
+    }
+    
+    urngame_t * newgame = UrnGame_create(urngame->num_players, num_urns, urngame->types, NULL, urngame->interaction_function);
+    UrnGame_copy(urngame, newgame);
+    free(num_urns);
+    return newgame;
+}
+
 unsigned int * 
 default_urnlearning_interaction(unsigned int players, urncollection_t **player_urns, rk_state *rand_state_ptr)
 {   

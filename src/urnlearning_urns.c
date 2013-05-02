@@ -148,24 +148,59 @@ Urn_randomSelect(urn_t *urn, rk_state *rand_state_ptr)
 }
 
 void 
-Urn_display(urn_t * urn, char *prefix)
+Urn_display(urn_t * urn, char *prefix, FILE *outfile)
 {
     assert(urn != NULL);
     if (urn == NULL){
         exit(EXIT_FAILURE);
     }
     
+    if (outfile == NULL){
+        outfile = stdout;
+    }
+    
     unsigned int i;
-    printf("%sCounts:", prefix);
+    fprintf(outfile, "%sCounts:", prefix);
     for (i = 0; i < urn->types; i++){
-        printf("  %g", *(urn->counts + i));
+        fprintf(outfile, "  %g", *(urn->counts + i));
     }
-    printf("\n");
-    printf("%sProportions:", prefix);
+    fprintf(outfile, "\n");
+    fprintf(outfile, "%sProportions:", prefix);
     for (i = 0; i < urn->types; i++){
-        printf("  %g", *(urn->proportions + i));
+        fprintf(outfile, "  %g", *(urn->proportions + i));
     }
-    printf("\n");
+    fprintf(outfile, "\n");
+}
+
+void 
+Urn_copy(urn_t *source, urn_t *target)
+{
+    assert(source != NULL);
+    assert(target != NULL);
+    assert(source->types == target->types);
+    if (source == NULL || target == NULL || source->types != target->types){
+        exit(EXIT_FAILURE);
+    }
+    
+    unsigned int i;
+    for (i = 0; i < source->types; i++){
+        *(target->counts + i) = *(source->counts + i);
+        *(target->proportions + i) = *(source->proportions + i);
+    }
+}
+
+urn_t *
+Urn_clone(urn_t *urn)
+{
+    assert(urn != NULL);
+    if (urn == NULL){
+        exit(EXIT_FAILURE);
+    }
+    
+    urn_t * newurn = Urn_create(urn->types, NULL);
+    Urn_copy(urn, newurn);
+    
+    return newurn;
 }
 
 urncollection_t * 
@@ -212,4 +247,40 @@ UrnCollection_destroy(urncollection_t *urnc)
         free(urnc->urns);
         free(urnc);
     }
+}
+
+void
+UrnCollection_copy(urncollection_t *source, urncollection_t *target)
+{
+    assert(source != NULL);
+    assert(target != NULL);
+    assert(source->num_urns == target->num_urns);
+    if (source == NULL || target == NULL || source->num_urns != target->num_urns){
+        exit(EXIT_FAILURE);
+    }
+    
+    unsigned int i;
+    for (i = 0; i < source->num_urns; i++){
+        Urn_copy(*(source->urns + i), *(target->urns + i));
+    }
+}
+
+urncollection_t *
+UrnCollection_clone(urncollection_t *urnc)
+{
+    assert(urnc != NULL);
+    if (urnc == NULL){
+        exit(EXIT_FAILURE);
+    }
+    
+    unsigned int * types = malloc(urnc->num_urns * sizeof(unsigned int));
+    unsigned int i;
+    for (i = 0; i < urnc->num_urns; i++){
+        *(types + i) = (*(urnc->urns + i))->types;
+    }
+    
+    urncollection_t * newurnc = UrnCollection_create(urnc->num_urns, types, NULL);
+    UrnCollection_copy(urnc, newurnc);
+    free(types);
+    return newurnc;
 }

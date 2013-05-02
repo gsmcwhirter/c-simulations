@@ -6,7 +6,7 @@
 #include "simulations/randomkit.h"
 
 void
-urnlearning_dynamics(urngame_t *urngame, unsigned int max_iterations, payoff_function payoff_func){
+urnlearning_dynamics(urngame_t *urngame, unsigned long max_iterations, payoff_function payoff_func){
     rk_state rand_state;
     rk_randomseed(&rand_state);
     
@@ -20,7 +20,7 @@ urnlearning_dynamics(urngame_t *urngame, unsigned int max_iterations, payoff_fun
         exit(EXIT_FAILURE);
     }
     
-    unsigned int iteration;
+    unsigned long iteration;
     unsigned int i;
     unsigned int tmp;
     for (iteration = 0; iteration < max_iterations; iteration++){

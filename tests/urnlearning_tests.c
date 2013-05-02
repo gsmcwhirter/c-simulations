@@ -133,9 +133,9 @@ test_urn_randomselect()
     unsigned int selected;
     for (i = 0; i < num_draws; i++){
         selected = Urn_randomSelect(urn, &rand_state);
-        mu_assert(selected >= 0 && selected < 4, "Random urn selection out of bounds (rand_state).");
+        mu_assert(selected < 4, "Random urn selection out of bounds (rand_state).");
         selected = Urn_randomSelect(urn, NULL);
-        mu_assert(selected >= 0 && selected < 4, "Random urn selection out of bounds (NULL).");
+        mu_assert(selected < 4, "Random urn selection out of bounds (NULL).");
     }
     
     Urn_destroy(urn);
