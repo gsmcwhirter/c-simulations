@@ -47,7 +47,7 @@ $(TESTS):
 	$(CC) $(CFLAGS) $@.c $(LFLAGS) -o $@ 
 
 # The Unit Tests
-.PHONY: test devtest
+.PHONY: test devtest clean
 test: LFLAGS += -Lbuild -lreplicator -lurnlearning
 test: $(TESTS)
 	sh ./tests/runtests.sh
@@ -76,7 +76,7 @@ install: all
 BADFUNCS='[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)'
 check:
 	@echo Files with potentially dangerous functions?
-	@egrep $(BADFUNCS) $(SOURCES) || true
+	@egrep $(BADFUNCS) $(SOURCES1) $(SOURCES2) || true
 
 # The Packager
 dist: all
