@@ -1,9 +1,9 @@
 #include <assert.h>
 #include <stdlib.h>
-#include "simulations/urnlearning_urns.h"
-#include "simulations/urnlearning_game.h"
-#include "simulations/urnlearning_simulation.h"
-#include "simulations/randomkit.h"
+#include "urnlearning_urns.h"
+#include "urnlearning_game.h"
+#include "urnlearning_simulation.h"
+#include "randomkit.h"
 
 void
 urnlearning_dynamics(urngame_t *urngame, unsigned long max_iterations, payoff_function payoff_func){

@@ -1,8 +1,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "simulations/urnlearning_urns.h"
-#include "simulations/randomkit.h"
+#include "urnlearning_urns.h"
+#include "randomkit.h"
 
 urn_t * 
 Urn_create(unsigned int types, double *initial_counts)

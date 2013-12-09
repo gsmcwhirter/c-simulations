@@ -1,4 +1,4 @@
-CFLAGS=-g -fopenmp -O2 -Wall -Wextra -Iinclude -DNDEBUG $(OPTFLAGS)
+CFLAGS=-g -fopenmp -O2 -Wall -Wextra -DNDEBUG $(OPTFLAGS)
 LFLAGS=-lm -lgomp $(OPTLIBS)
 PREFIX?=/usr/local
 
@@ -6,7 +6,7 @@ SOURCES1=$(wildcard src/replicator_*.c src/distributions.c src/randomkit.c)
 OBJECTS1=$(patsubst %.c,%.o,$(SOURCES1))
 SOURCES2=$(wildcard src/urnlearning_*.c src/distributions.c src/randomkit.c)
 OBJECTS2=$(patsubst %.c,%.o,$(SOURCES2))
-HEADERS=$(wildcard include/**/*.h include/*.h)
+HEADERS=$(wildcard src/*.h tests/*.h)
 
 TEST_SRC=$(wildcard tests/*_tests.c)
 TESTS=$(patsubst %.c,%,$(TEST_SRC))
@@ -20,7 +20,7 @@ DIST_NAME?=c-simulations
 # The Target Build
 all: $(TARGET1) $(SO_TARGET1) $(TARGET2) $(SO_TARGET2) 
 
-dev: CFLAGS=-g -fopenmp -Wall -Wextra -Iinclude -rdynamic $(OPTFLAGS)
+dev: CFLAGS=-g -fopenmp -Wall -Wextra $(OPTFLAGS)
 dev: all
 
 clib: all
@@ -50,11 +50,12 @@ $(TESTS):
 
 # The Unit Tests
 .PHONY: test devtest clean
+test: CFLAGS += -Isrc
 test: LFLAGS += -Lbuild -lreplicator -lurnlearning
 test: $(TESTS)
 	sh ./tests/runtests.sh
 	
-devtest: CFLAGS=-g -fopenmp -Wall -Wextra -Iinclude -rdynamic $(OPTFLAGS)
+devtest: CFLAGS=-g -fopenmp -Wall -Wextra $(OPTFLAGS)
 devtest: test
 	
 # The Cleaner
@@ -65,14 +66,14 @@ clean:
 	rm -rf `find . -name "*.dSYM" -print`
 
 # The Install
-install: all
-	install -d $(PREFIX)/lib/
-	install -d $(PREFIX)/include/simulations/
-	install $(TARGET1) $(PREFIX)/lib/
-	install $(TARGET2) $(PREFIX)/lib/
-	install $(SO_TARGET1) $(PREFIX)/lib/
-	install $(SO_TARGET2) $(PREFIX)/lib/
-	install $(HEADERS) $(PREFIX)/include/simulations/
+# install: all
+# 	install -d $(PREFIX)/lib/
+# 	install -d $(PREFIX)/include/simulations/
+# 	install $(TARGET1) $(PREFIX)/lib/
+# 	install $(TARGET2) $(PREFIX)/lib/
+# 	install $(SO_TARGET1) $(PREFIX)/lib/
+# 	install $(SO_TARGET2) $(PREFIX)/lib/
+# 	install $(HEADERS) $(PREFIX)/include/simulations/
 
 # The Checker
 BADFUNCS='[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)'
@@ -87,5 +88,6 @@ dist: all
 	cp $(TARGET2) dist/$(DIST_NAME)
 	cp $(SO_TARGET1) dist/$(DIST_NAME)
 	cp $(SO_TARGET2) dist/$(DIST_NAME)
-	cp -r include dist/$(DIST_NAME)
+	@mkdir -p dist/$(DIST_NAME)/include
+	cp -r src/*.h dist/$(DIST_NAME)/include
 	tar czvfC dist/$(DIST_NAME).tar.gz dist $(DIST_NAME)

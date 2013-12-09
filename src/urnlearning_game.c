@@ -1,9 +1,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "simulations/urnlearning_urns.h"
-#include "simulations/urnlearning_game.h"
-#include "simulations/randomkit.h"
+#include "urnlearning_urns.h"
+#include "urnlearning_game.h"
+#include "randomkit.h"
 
 urngame_t *
 UrnGame_create(unsigned int num_players, unsigned int *num_urns, unsigned int **types, double ***initial_counts, urn_interaction func)

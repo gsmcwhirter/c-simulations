@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include "simulations/replicator_population.h"
-#include "simulations/randomkit.h"
-#include "simulations/distributions.h"
+#include "replicator_population.h"
+#include "randomkit.h"
+#include "distributions.h"
 
 population_t *
 Population_create(int size)

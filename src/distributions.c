@@ -42,7 +42,7 @@
  */
 
 #include <math.h>
-#include "simulations/distributions.h"
+#include "distributions.h"
 #include <stdio.h>
 
 #ifndef min
