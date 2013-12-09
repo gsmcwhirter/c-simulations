@@ -2,7 +2,7 @@
 #define URNLEARNING_URNS_H
 #include <stdio.h>
 
-#include "simulations/randomkit.h"
+#include "randomkit.h"
 
 
 struct Urn {

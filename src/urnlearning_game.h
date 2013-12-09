@@ -1,8 +1,8 @@
 #ifndef URNLEARNING_GAME_H
 #define URNLEARNING_GAME_H
 
-#include "simulations/urnlearning_urns.h"
-#include "simulations/randomkit.h"
+#include "urnlearning_urns.h"
+#include "randomkit.h"
 
 typedef unsigned int * (*urn_interaction)(unsigned int players, urncollection_t **player_urns, rk_state *random_state);
 
