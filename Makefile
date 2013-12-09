@@ -23,6 +23,8 @@ all: $(TARGET1) $(SO_TARGET1) $(TARGET2) $(SO_TARGET2)
 dev: CFLAGS=-g -fopenmp -Wall -Wextra -Iinclude -rdynamic $(OPTFLAGS)
 dev: all
 
+clib: all
+
 $(TARGET1) $(TARGET2): CFLAGS += -fPIC
 
 $(TARGET1): build $(OBJECTS1)

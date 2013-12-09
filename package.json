@@ -21,5 +21,6 @@
 	,	"include/simulations/urnlearning_game.c"
 	,	"include/simulations/urnlearning_simulation.c"
 	,	"include/simulations/urnlearning_urns.c"
-	]
+	],
+	"install": "make clib"
 }
