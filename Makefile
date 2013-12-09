@@ -1,10 +1,11 @@
 CFLAGS=-g -fopenmp -O2 -Wall -Wextra -DNDEBUG $(OPTFLAGS)
 LFLAGS=-lm -lgomp $(OPTLIBS)
+SRC?=src
 PREFIX?=/usr/local
 
-SOURCES1=$(wildcard src/replicator_*.c src/distributions.c src/randomkit.c)
+SOURCES1=$(wildcard $(SRC)/replicator_*.c $(SRC)/distributions.c $(SRC)/randomkit.c)
 OBJECTS1=$(patsubst %.c,%.o,$(SOURCES1))
-SOURCES2=$(wildcard src/urnlearning_*.c src/distributions.c src/randomkit.c)
+SOURCES2=$(wildcard $(SRC)/urnlearning_*.c $(SRC)/distributions.c $(SRC)/randomkit.c)
 OBJECTS2=$(patsubst %.c,%.o,$(SOURCES2))
 HEADERS=$(wildcard src/*.h tests/*.h)
 
@@ -22,8 +23,6 @@ all: $(TARGET1) $(SO_TARGET1) $(TARGET2) $(SO_TARGET2)
 
 dev: CFLAGS=-g -fopenmp -Wall -Wextra $(OPTFLAGS)
 dev: all
-
-clib: all
 
 $(TARGET1) $(TARGET2): CFLAGS += -fPIC
 
