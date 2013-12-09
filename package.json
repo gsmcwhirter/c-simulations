@@ -1,11 +1,11 @@
 {
 	"name": "c-simulations",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"repo": "gsmcwhirter/c-simulations",
 	"description": "Library for writing urn-learning and replicator dynamics simulations",
 	"license": "MIT",
 	"src": [
-		"src/distribution.c"
+		"src/distributions.c"
 	, 	"src/randomkit.c"
 	,	"src/replicator_game.c"
 	, 	"src/replicator_population.c"
@@ -13,7 +13,7 @@
 	,	"src/urnlearning_game.c"
 	,	"src/urnlearning_simulation.c"
 	,	"src/urnlearning_urns.c"
-	, 	"src/distribution.h"
+	, 	"src/distributions.h"
 	, 	"src/randomkit.h"
 	,	"src/replicator_game.h"
 	, 	"src/replicator_population.h"
