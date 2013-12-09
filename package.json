@@ -5,7 +5,8 @@
 	"description": "Library for writing urn-learning and replicator dynamics simulations",
 	"license": "MIT",
 	"src": [
-		"src/distributions.c"
+		"Makefile"
+	,	"src/distributions.c"
 	, 	"src/randomkit.c"
 	,	"src/replicator_game.c"
 	, 	"src/replicator_population.c"
@@ -21,6 +22,5 @@
 	,	"src/urnlearning_game.h"
 	,	"src/urnlearning_simulation.h"
 	,	"src/urnlearning_urns.h"
-	],
-	"install": "make clib"
+	]
 }
