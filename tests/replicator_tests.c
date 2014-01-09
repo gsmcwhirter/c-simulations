@@ -1079,11 +1079,12 @@ test_update_population_proportions_2pop()
 int gencounter;
 
 void
-count_generations(game_t *game, int generation, popcollection_t *generation_pop)
+count_generations(game_t *game, int generation, popcollection_t *generation_pop, FILE *outfile)
 {
     UNUSED(game);
     UNUSED(generation);
     UNUSED(generation_pop);
+    UNUSED(outfile);
     gencounter++;
 }
 
@@ -1095,7 +1096,7 @@ test_replicator_dynamics_1pop()
     popcollection_t *popc = Game_PopCollection_create(game);
     PopCollection_randomize(popc);
     
-    popcollection_t *endpop1 = replicator_dynamics(game, popc, 0, effective_zero, 0, CACHE_NONE, NULL);
+    popcollection_t *endpop1 = replicator_dynamics(game, popc, 0, effective_zero, 0, CACHE_NONE, NULL, NULL);
     mu_assert(endpop1 != NULL, "RD 1 returned null.");
     mu_assert(fabs(0 - *((*(endpop1->populations))->proportions)) < effective_zero, "RD 1 returned wrong population 0.");
     mu_assert(fabs(1 - *((*(endpop1->populations))->proportions + 1)) < effective_zero, "RD 1 returned wrong population 1.");
@@ -1103,13 +1104,13 @@ test_replicator_dynamics_1pop()
     gencounter = 0;
     *((*(popc->populations))->proportions) = 0.5;
     *((*(popc->populations))->proportions + 1) = 0.5;
-    popcollection_t *endpop2 = replicator_dynamics(game, popc, 0, effective_zero, 1, CACHE_NONE, count_generations);
+    popcollection_t *endpop2 = replicator_dynamics(game, popc, 0, effective_zero, 1, CACHE_NONE, count_generations, NULL);
     mu_assert(endpop2 != NULL, "RD 2 returned NULL.");
     mu_assert(gencounter == 1, "RD 2 took too many generations.");
     mu_assert(fabs(*((*(endpop2->populations))->proportions) - 0.375) < effective_zero, "RD 2 returned wrong population 0.");
     mu_assert(fabs(*((*(endpop2->populations))->proportions + 1) - 0.625) < effective_zero, "RD 2 returned wrong population 1.");
     
-    popcollection_t *endpop3 = replicator_dynamics(game, NULL, 0, effective_zero, 0, CACHE_PROFILES | CACHE_PAYOFFS, NULL);
+    popcollection_t *endpop3 = replicator_dynamics(game, NULL, 0, effective_zero, 0, CACHE_PROFILES | CACHE_PAYOFFS, NULL, NULL);
     mu_assert(endpop3 != NULL, "RD 3 returned null.");
     mu_assert(fabs(*((*(endpop3->populations))->proportions) - 0) < effective_zero, "RD 3 returned wrong population 0.");
     mu_assert(fabs(*((*(endpop3->populations))->proportions + 1) - 1.0) < effective_zero, "RD 3 returned wrong population 1.");
@@ -1131,7 +1132,7 @@ test_replicator_dynamics_2pop()
     popcollection_t *popc = Game_PopCollection_create(game);
     PopCollection_randomize(popc);
     
-    popcollection_t *endpop1 = replicator_dynamics(game, popc, 0, effective_zero, 0, CACHE_ALL, NULL);
+    popcollection_t *endpop1 = replicator_dynamics(game, popc, 0, effective_zero, 0, CACHE_ALL, NULL, NULL);
     mu_assert(endpop1 != NULL, "RD 1 returned null.");
     mu_assert(fabs(0 - *((*(endpop1->populations))->proportions)) < effective_zero, "RD 1 returned wrong population 0-0.");
     mu_assert(fabs(1 - *((*(endpop1->populations))->proportions + 1)) < effective_zero, "RD 1 returned wrong population 0-1.");
@@ -1143,7 +1144,7 @@ test_replicator_dynamics_2pop()
     *((*(popc->populations))->proportions + 1) = 0.5;
     *((*(popc->populations + 1))->proportions) = 0.5;
     *((*(popc->populations + 1))->proportions + 1) = 0.5;
-    popcollection_t *endpop2 = replicator_dynamics(game, popc, 0, effective_zero, 1, CACHE_PAYOFFS, count_generations);
+    popcollection_t *endpop2 = replicator_dynamics(game, popc, 0, effective_zero, 1, CACHE_PAYOFFS, count_generations, NULL);
     mu_assert(endpop2 != NULL, "RD 2 returned NULL.");
     mu_assert(gencounter == 1, "RD 2 took too many generations.");
     mu_assert(fabs(*((*(endpop2->populations))->proportions) - 0.375) < effective_zero, "RD 2 returned wrong population 0-0.");
@@ -1151,7 +1152,7 @@ test_replicator_dynamics_2pop()
     mu_assert(fabs(*((*(endpop2->populations + 1))->proportions) - 0.375) < effective_zero, "RD 2 returned wrong population 1-0.");
     mu_assert(fabs(*((*(endpop2->populations + 1))->proportions + 1) - 0.625) < effective_zero, "RD 2 returned wrong population 1-1.");
     
-    popcollection_t *endpop3 = replicator_dynamics(game, NULL, 0, effective_zero, 0, CACHE_PROFILES, NULL);
+    popcollection_t *endpop3 = replicator_dynamics(game, NULL, 0, effective_zero, 0, CACHE_PROFILES, NULL, NULL);
     mu_assert(endpop3 != NULL, "RD 3 returned null.");
     mu_assert(fabs(*((*(endpop3->populations))->proportions) - 0) < effective_zero, "RD 3 returned wrong population 0-0.");
     mu_assert(fabs(*((*(endpop3->populations))->proportions + 1) - 1.0) < effective_zero, "RD 3 returned wrong population 0-1.");

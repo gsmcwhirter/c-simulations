@@ -17,6 +17,8 @@ tests/tests.log
 tests/*_tests
 tests/*.serial
 
+*.dSYM
+
 # Make results
 build
 dist
