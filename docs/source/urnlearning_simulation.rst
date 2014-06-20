@@ -6,7 +6,7 @@ Urn-Learning Simulations
 Types
 -----
 
-	.. c:type:: payoff_function
+	.. c:type:: double ** (*payoff_function)(unsigned int players, unsigned int **types, unsigned int * state_action_profile)
 
 Functions
 ---------

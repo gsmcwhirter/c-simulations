@@ -6,7 +6,7 @@ Urn-Learning Games
 Types
 -----
 
-	.. c:type:: urn_interaction
+	.. c:type:: unsigned int * (*urn_interaction)(unsigned int players, urncollection_t **player_urns, rk_state *random_state)
 
 	.. c:type:: urngame_t
 

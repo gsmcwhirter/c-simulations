@@ -8,21 +8,39 @@ Types
 
 	.. c:type:: population_t
 
+		This is a shortcut for a :c:type:`Population` struct.
+
 	.. c:type:: popcollection_t
+
+		This is a shortcut for a :c:type:`PopCollection` struct.
 
 	.. c:type:: struct Population
 
+		This struct holds the data relevant to a single replicator population
+
 		.. c:member:: int Population.size
+
+			This member determines how many entries are in the :c:member:`Population.proportions` array.
 
 		.. c:member:: double* Population.proportions
 
+			This member holds the population proportions.
+
 	.. c:type:: struct PopCollection
+
+		This struct holds a collection of :c:type:`population_t` structs.
 
 		.. c:member:: int PopCollection.size
 
+			This determines how many populations are collected.
+
 		.. c:member:: int* PopCollection.pop_sizes
 
+			This is an array of the sizes of each of the populations collected.
+
 		.. c:member:: popcollection_t** PopCollection.populations
+
+			This is an array of the populations.
 
 
 Functions
