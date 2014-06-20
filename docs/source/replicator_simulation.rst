@@ -6,7 +6,7 @@ Replicator Simulations
 Types
 -----
 
-	.. c:type:: cb_func
+	.. c:type:: void (*cb_func)(game_t *game, int generation, popcollection_t *generation_pop, FILE *outfile)
 
 Functions
 ---------
